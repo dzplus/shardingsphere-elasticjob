@@ -19,6 +19,7 @@ package org.apache.shardingsphere.elasticjob.reg.base;
 
 /**
  * Registry center.
+ * 任务注册中心
  */
 public interface RegistryCenter {
     

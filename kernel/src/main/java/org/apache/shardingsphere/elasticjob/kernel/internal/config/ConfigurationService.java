@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.kernel.infra.exception.JobConfigurationException;
@@ -29,20 +30,21 @@ import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 /**
  * Configuration service.
  */
+@Slf4j
 public final class ConfigurationService {
-    
+
     private final TimeService timeService;
-    
+
     private final JobNodeStorage jobNodeStorage;
-    
+
     public ConfigurationService(final CoordinatorRegistryCenter regCenter, final String jobName) {
         jobNodeStorage = new JobNodeStorage(regCenter, jobName);
         timeService = new TimeService();
     }
-    
+
     /**
      * Load job configuration.
-     * 
+     *
      * @param fromCache load from cache or not
      * @return job configuration
      */
@@ -62,24 +64,26 @@ public final class ConfigurationService {
             throw new JobConfigurationException("JobConfiguration was not found. It maybe has been removed or has not been configured correctly.");
         }
     }
-    
+
     /**
      * Set up job configuration.
-     * 
+     *
      * @param jobClassName job class name
-     * @param jobConfig job configuration to be updated
+     * @param jobConfig    job configuration to be updated
      * @return accepted job configuration
      */
     public JobConfiguration setUpJobConfiguration(final String jobClassName, final JobConfiguration jobConfig) {
         checkConflictJob(jobClassName, jobConfig);
+        //不存在就把配置写入zk 或者配置允许被覆盖
         if (!jobNodeStorage.isJobNodeExisted(ConfigurationNode.ROOT) || jobConfig.isOverwrite()) {
             jobNodeStorage.replaceJobNode(ConfigurationNode.ROOT, YamlEngine.marshal(JobConfigurationPOJO.fromJobConfiguration(jobConfig)));
             jobNodeStorage.replaceJobRootNode(jobClassName);
             return jobConfig;
         }
+        //刷新配置 不走缓存 强制刷新
         return load(false);
     }
-    
+
     private void checkConflictJob(final String newJobClassName, final JobConfiguration jobConfig) {
         if (!jobNodeStorage.isJobRootNodeExisted()) {
             return;
@@ -90,10 +94,10 @@ public final class ConfigurationService {
                     "Job conflict with register center. The job '%s' in register center's class is '%s', your job class is '%s'", jobConfig.getJobName(), originalJobClassName, newJobClassName);
         }
     }
-    
+
     /**
      * Check max time different seconds tolerable between job server and registry center.
-     * 
+     *
      * @throws JobExecutionEnvironmentException throe JobExecutionEnvironmentException if exceed max time different seconds
      */
     public void checkMaxTimeDiffSecondsTolerable() throws JobExecutionEnvironmentException {

@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.instance.InstanceService;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobRegistry;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobScheduleController;
@@ -29,6 +30,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.ConnectionStateChangedE
 /**
  * Registry center connection state listener.
  */
+@Slf4j
 public final class RegistryCenterConnectionStateListener implements ConnectionStateChangedEventListener {
     
     private final String jobName;
@@ -51,6 +53,7 @@ public final class RegistryCenterConnectionStateListener implements ConnectionSt
     
     @Override
     public void onStateChanged(final CoordinatorRegistryCenter registryCenter, final State newState) {
+        log.info("org.apache.shardingsphere.elasticjob.kernel.internal.listener.RegistryCenterConnectionStateListener.onStateChanged");
         if (JobRegistry.getInstance().isShutdown(jobName)) {
             return;
         }

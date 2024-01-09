@@ -19,6 +19,7 @@ package org.apache.shardingsphere.elasticjob.spring.boot.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ElasticJob;
@@ -56,8 +57,10 @@ public class ElasticJobBootstrapConfiguration implements SmartInitializingSingle
     /**
      * Create job bootstrap instances and register them into container.
      */
+    // TODO duanzhang 2024/1/9 15:25 这个地方是初始化
     public void createJobBootstrapBeans() {
         ElasticJobProperties elasticJobProperties = applicationContext.getBean(ElasticJobProperties.class);
+//        log.info("elasticJobProperties:{}",new Gson().toJson(elasticJobProperties));
         SingletonBeanRegistry singletonBeanRegistry = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
         CoordinatorRegistryCenter registryCenter = applicationContext.getBean(CoordinatorRegistryCenter.class);
         TracingConfiguration<?> tracingConfig = getTracingConfiguration();
@@ -88,8 +91,10 @@ public class ElasticJobBootstrapConfiguration implements SmartInitializingSingle
                     || Strings.isNullOrEmpty(jobConfigurationProperties.getElasticJobType()),
                     "[elasticJobClass] and [elasticJobType] are mutually exclusive.");
             if (null != jobConfigurationProperties.getElasticJobClass()) {
+                log.info("registerClassedJob:{},{},{},{},{}",entry.getKey(), entry.getValue().getJobBootstrapBeanName(), registryCenter, tracingConfig, jobConfigurationProperties);
                 registerClassedJob(entry.getKey(), entry.getValue().getJobBootstrapBeanName(), singletonBeanRegistry, registryCenter, tracingConfig, jobConfigurationProperties);
             } else if (!Strings.isNullOrEmpty(jobConfigurationProperties.getElasticJobType())) {
+                log.info("registerTypedJob:{},{},{},{},{}",entry.getKey(), entry.getValue().getJobBootstrapBeanName(), registryCenter, tracingConfig, jobConfigurationProperties);
                 registerTypedJob(entry.getKey(), entry.getValue().getJobBootstrapBeanName(), singletonBeanRegistry, registryCenter, tracingConfig, jobConfigurationProperties);
             }
         }

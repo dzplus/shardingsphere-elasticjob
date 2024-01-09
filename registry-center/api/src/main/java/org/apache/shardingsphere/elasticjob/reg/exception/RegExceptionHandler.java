@@ -39,7 +39,7 @@ public final class RegExceptionHandler {
             return;
         }
         if (isIgnoredException(cause) || null != cause.getCause() && isIgnoredException(cause.getCause())) {
-            log.debug("Elastic job: ignored exception for: {}", cause.getMessage());
+            log.info("Elastic job: ignored exception for: {}", cause.getMessage());
         } else if (cause instanceof InterruptedException) {
             Thread.currentThread().interrupt();
         } else {

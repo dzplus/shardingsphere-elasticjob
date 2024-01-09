@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.trigger;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.listener.AbstractListenerManager;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobRegistry;
 import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
@@ -27,6 +29,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 /**
  * Job trigger listener manager.
  */
+@Slf4j
 public final class TriggerListenerManager extends AbstractListenerManager {
     
     private final String jobName;
@@ -51,12 +54,14 @@ public final class TriggerListenerManager extends AbstractListenerManager {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("DataChangedEvent: {}", new Gson().toJson(event));
             if (!triggerNode.isLocalTriggerPath(event.getKey()) || Type.ADDED != event.getType()) {
                 return;
             }
             triggerService.removeTriggerFlag();
             if (!JobRegistry.getInstance().isShutdown(jobName) && !JobRegistry.getInstance().isJobRunning(jobName)) {
                 // TODO At present, it cannot be triggered when the job is running, and it will be changed to a stacked trigger in the future.
+                log.info("jobScheduler通过DataChangedEvent触发");
                 JobRegistry.getInstance().getJobScheduleController(jobName).triggerJob();
             }
         }

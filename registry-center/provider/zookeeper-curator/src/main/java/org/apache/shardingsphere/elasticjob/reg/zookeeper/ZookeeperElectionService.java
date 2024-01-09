@@ -61,7 +61,7 @@ public final class ZookeeperElectionService {
      * Start election.
      */
     public void start() {
-        log.debug("Elastic job: {} start to elect leadership", leaderSelector.getId());
+        log.info("Elastic job: {} start to elect leadership", leaderSelector.getId());
         leaderSelector.start();
     }
     

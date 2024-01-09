@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.spi.listener.ElasticJobListener;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.RescheduleListenerManager;
 import org.apache.shardingsphere.elasticjob.kernel.internal.election.ElectionListenerManager;
@@ -34,6 +35,7 @@ import java.util.Collection;
 /**
  * Listener manager facade.
  */
+@Slf4j
 public final class ListenerManager {
     
     private final JobNodeStorage jobNodeStorage;
@@ -74,6 +76,7 @@ public final class ListenerManager {
      * Start all listeners.
      */
     public void startAllListeners() {
+        log.info("开始启动所有监听器");
         electionListenerManager.start();
         shardingListenerManager.start();
         failoverListenerManager.start();

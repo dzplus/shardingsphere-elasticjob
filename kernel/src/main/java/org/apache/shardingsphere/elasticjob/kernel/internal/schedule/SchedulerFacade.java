@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.schedule;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.election.LeaderService;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.ExecutionService;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.ShardingService;
@@ -25,6 +26,7 @@ import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
 /**
  * Scheduler facade.
  */
+@Slf4j
 public final class SchedulerFacade {
     
     private final String jobName;
@@ -48,6 +50,7 @@ public final class SchedulerFacade {
      * @return job trigger listener
      */
     public JobTriggerListener newJobTriggerListener() {
+        log.info("初始化一个新的JobTriggerListener,{}",jobName);
         return new JobTriggerListener(executionService, shardingService);
     }
     

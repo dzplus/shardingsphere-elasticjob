@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.kernel.internal.sharding;
 
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.spi.listener.param.ShardingContexts;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.ConfigurationService;
@@ -34,6 +35,7 @@ import java.util.Map;
 /**
  * Execution service.
  */
+@Slf4j
 public final class ExecutionService {
     
     private final String jobName;
@@ -114,7 +116,11 @@ public final class ExecutionService {
             return false;
         }
         for (int each : items) {
-            if (jobNodeStorage.isJobNodeExisted(ShardingNode.getRunningNode(each))) {
+            String runningNode = ShardingNode.getRunningNode(each);
+            log.info("hasRunningItems#runningNode:{}", runningNode);
+            boolean jobNodeExisted = jobNodeStorage.isJobNodeExisted(runningNode);
+            log.info("hasRunningItems#jobNodeExisted:{}", runningNode);
+            if (jobNodeExisted) {
                 return true;
             }
         }

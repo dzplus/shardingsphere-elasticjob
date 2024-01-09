@@ -68,7 +68,7 @@ public final class HttpJobExecutor implements TypedJobItemExecutor {
                 }
             }
             if (isRequestSucceed(responseCode)) {
-                log.debug("HTTP job execute result : {}", result);
+                log.info("HTTP job execute result : {}", result);
             } else {
                 log.warn("HTTP job {} executed with response body {}", jobConfig.getJobName(), result);
             }

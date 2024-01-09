@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.kernel.executor.error.handler;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.spi.executor.error.handler.JobErrorHandler;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
@@ -28,6 +29,7 @@ import java.util.Properties;
 /**
  * Job error handler reloader.
  */
+@Slf4j
 public final class JobErrorHandlerReloader implements Closeable {
     
     private Properties props;
@@ -46,9 +48,11 @@ public final class JobErrorHandlerReloader implements Closeable {
      */
     public synchronized void reloadIfNecessary(final JobConfiguration jobConfig) {
         if (jobErrorHandler.getType().equals(jobConfig.getJobErrorHandlerType()) && props.equals(jobConfig.getProps())) {
+            log.warn("ElasticJob: JobErrorHandler {} NOT reloading...", jobConfig.getJobErrorHandlerType());
             return;
         }
         jobErrorHandler.close();
+        log.info("ElasticJob: JobErrorHandler {} is reloading...", jobConfig.getJobErrorHandlerType());
         init(jobConfig);
     }
     

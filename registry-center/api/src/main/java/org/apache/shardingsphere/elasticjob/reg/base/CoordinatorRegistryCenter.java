@@ -26,6 +26,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Coordinator registry center.
+ * 协调注册中心（ZK）
  */
 public interface CoordinatorRegistryCenter extends RegistryCenter {
     

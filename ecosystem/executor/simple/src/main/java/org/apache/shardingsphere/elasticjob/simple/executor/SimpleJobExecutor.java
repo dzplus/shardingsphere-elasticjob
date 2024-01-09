@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.simple.executor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.spi.executor.item.param.ShardingContext;
 import org.apache.shardingsphere.elasticjob.spi.executor.item.param.JobRuntimeService;
@@ -26,10 +27,12 @@ import org.apache.shardingsphere.elasticjob.simple.job.SimpleJob;
 /**
  * Simple job executor.
  */
+@Slf4j
 public final class SimpleJobExecutor implements ClassedJobItemExecutor<SimpleJob> {
     
     @Override
     public void process(final SimpleJob elasticJob, final JobConfiguration jobConfig, final JobRuntimeService jobRuntimeService, final ShardingContext shardingContext) {
+        log.info("SimpleJobExecutor process,{},{},{}",elasticJob.getClass().getName(),jobConfig.getJobName(),jobConfig.getJobListenerTypes());
         elasticJob.execute(shardingContext);
     }
     

@@ -19,6 +19,7 @@ package org.apache.shardingsphere.elasticjob.bootstrap.type;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ElasticJob;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.bootstrap.JobBootstrap;
@@ -29,31 +30,39 @@ import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
 /**
  * Schedule job bootstrap.
  */
+@Slf4j
 public final class ScheduleJobBootstrap implements JobBootstrap {
-    
+
     private final JobScheduler jobScheduler;
-    
+
     public ScheduleJobBootstrap(final CoordinatorRegistryCenter regCenter, final ElasticJob elasticJob, final JobConfiguration jobConfig) {
+        log.info("ScheduleJobBootstrap初始化");
         jobScheduler = new JobScheduler(regCenter, elasticJob, jobConfig);
+        log.info("ScheduleJobBootstrap初始化...完成");
     }
-    
+
     public ScheduleJobBootstrap(final CoordinatorRegistryCenter regCenter, final String elasticJobType, final JobConfiguration jobConfig) {
+        log.info("ScheduleJobBootstrap初始化1");
         jobScheduler = new JobScheduler(regCenter, elasticJobType, jobConfig);
+        log.info("ScheduleJobBootstrap初始化...完成");
     }
-    
+
     public ScheduleJobBootstrap(final CoordinatorRegistryCenter regCenter, final ElasticJob elasticJob) {
+        log.info("ScheduleJobBootstrap初始化2");
         JobConfiguration jobConfig = JobAnnotationBuilder.generateJobConfiguration(elasticJob.getClass());
         jobScheduler = new JobScheduler(regCenter, elasticJob, jobConfig);
+        log.info("ScheduleJobBootstrap初始化...完成");
     }
-    
+
     /**
      * Schedule job.
      */
     public void schedule() {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobScheduler.getJobConfig().getCron()), "Cron can not be empty.");
+        log.info("jobScheduler通过Cron触发,name:{}", jobScheduler.getJobConfig().getJobName());
         jobScheduler.getJobScheduleController().scheduleJob(jobScheduler.getJobConfig().getCron(), jobScheduler.getJobConfig().getTimeZone());
     }
-    
+
     @Override
     public void shutdown() {
         jobScheduler.shutdown();

@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.tracing.rdb.listener;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.spi.tracing.event.JobExecutionEvent;
 import org.apache.shardingsphere.elasticjob.spi.tracing.event.JobStatusTraceEvent;
 import org.apache.shardingsphere.elasticjob.spi.tracing.listener.TracingListener;
@@ -28,6 +30,7 @@ import java.sql.SQLException;
 /**
  * RDB tracing listener.
  */
+@Slf4j
 public final class RDBTracingListener implements TracingListener {
     
     private final RDBJobEventRepository repository;
@@ -38,11 +41,13 @@ public final class RDBTracingListener implements TracingListener {
     
     @Override
     public void listen(final JobExecutionEvent executionEvent) {
+        log.info("收到任务执行事件: {}", new Gson().toJson(executionEvent));
         repository.addJobExecutionEvent(executionEvent);
     }
     
     @Override
     public void listen(final JobStatusTraceEvent jobStatusTraceEvent) {
+        log.info("收到任务状态跟踪事件: {}", new Gson().toJson(jobStatusTraceEvent));
         repository.addJobStatusTraceEvent(jobStatusTraceEvent);
     }
 }

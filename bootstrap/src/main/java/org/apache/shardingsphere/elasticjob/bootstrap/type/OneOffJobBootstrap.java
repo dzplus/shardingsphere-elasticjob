@@ -19,6 +19,7 @@ package org.apache.shardingsphere.elasticjob.bootstrap.type;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ElasticJob;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.bootstrap.JobBootstrap;
@@ -30,6 +31,7 @@ import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
 /**
  * One off job bootstrap.
  */
+@Slf4j
 public final class OneOffJobBootstrap implements JobBootstrap {
     
     private final JobScheduler jobScheduler;
@@ -37,21 +39,27 @@ public final class OneOffJobBootstrap implements JobBootstrap {
     private final InstanceService instanceService;
     
     public OneOffJobBootstrap(final CoordinatorRegistryCenter regCenter, final ElasticJob elasticJob, final JobConfiguration jobConfig) {
+        log.info("OneOffJobBootstrap初始化");
         Preconditions.checkArgument(Strings.isNullOrEmpty(jobConfig.getCron()), "Cron should be empty.");
         jobScheduler = new JobScheduler(regCenter, elasticJob, jobConfig);
         instanceService = new InstanceService(regCenter, jobConfig.getJobName());
+        log.info("OneOffJobBootstrap初始化....完成");
     }
     
     public OneOffJobBootstrap(final CoordinatorRegistryCenter regCenter, final String elasticJobType, final JobConfiguration jobConfig) {
+        log.info("OneOffJobBootstrap初始化2");
         Preconditions.checkArgument(Strings.isNullOrEmpty(jobConfig.getCron()), "Cron should be empty.");
         jobScheduler = new JobScheduler(regCenter, elasticJobType, jobConfig);
         instanceService = new InstanceService(regCenter, jobConfig.getJobName());
+        log.info("OneOffJobBootstrap初始化....完成");
     }
     
     public OneOffJobBootstrap(final CoordinatorRegistryCenter regCenter, final ElasticJob elasticJob) {
+        log.info("OneOffJobBootstrap初始化3");
         JobConfiguration jobConfig = JobAnnotationBuilder.generateJobConfiguration(elasticJob.getClass());
         jobScheduler = new JobScheduler(regCenter, elasticJob, jobConfig);
         instanceService = new InstanceService(regCenter, jobConfig.getJobName());
+        log.info("OneOffJobBootstrap初始化....完成");
     }
     
     /**

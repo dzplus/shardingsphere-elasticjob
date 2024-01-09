@@ -86,6 +86,7 @@ public final class JobTracingEventBus {
      */
     public void post(final JobEvent event) {
         if (isRegistered && !EXECUTOR_SERVICE.isShutdown()) {
+            log.info("发布事件:{}", event);
             eventBus.post(event);
         }
     }

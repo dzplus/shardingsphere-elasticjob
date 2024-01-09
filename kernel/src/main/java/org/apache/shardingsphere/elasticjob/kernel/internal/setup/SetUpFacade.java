@@ -69,7 +69,9 @@ public final class SetUpFacade {
      */
     public void registerStartUpInfo(final boolean enabled) {
         listenerManager.startAllListeners();
+        //选举
         leaderService.electLeader();
+        //存储在云端
         serverService.persistOnline(enabled);
         instanceService.persistOnline();
         if (!reconcileService.isRunning()) {

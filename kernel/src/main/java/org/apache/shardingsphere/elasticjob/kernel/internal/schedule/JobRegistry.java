@@ -19,6 +19,7 @@ package org.apache.shardingsphere.elasticjob.kernel.internal.schedule;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.internal.listener.ListenerNotifierManager;
 import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Job registry.
  */
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JobRegistry {
     
@@ -68,6 +70,7 @@ public final class JobRegistry {
      * @param regCenter registry center
      */
     public void registerRegistryCenter(final String jobName, final CoordinatorRegistryCenter regCenter) {
+        log.info("添加到regCenterMap:{}", jobName);
         regCenterMap.put(jobName, regCenter);
         regCenter.addCacheData("/" + jobName);
     }
@@ -79,6 +82,7 @@ public final class JobRegistry {
      * @param jobScheduleController job schedule controller
      */
     public void registerJob(final String jobName, final JobScheduleController jobScheduleController) {
+        log.info("注册Job到schedulerMap:{}", jobName);
         schedulerMap.put(jobName, jobScheduleController);
     }
     
@@ -89,6 +93,7 @@ public final class JobRegistry {
      * @return job schedule controller
      */
     public JobScheduleController getJobScheduleController(final String jobName) {
+        log.info("从schedulerMap取出注册的Job:{}", jobName);
         return schedulerMap.get(jobName);
     }
     
@@ -168,6 +173,7 @@ public final class JobRegistry {
      * @param jobName job name
      */
     public void shutdown(final String jobName) {
+        log.info("关闭Job:{}", jobName);
         Optional.ofNullable(schedulerMap.remove(jobName)).ifPresent(JobScheduleController::shutdown);
         Optional.ofNullable(regCenterMap.remove(jobName)).ifPresent(regCenter -> regCenter.evictCacheData("/" + jobName));
         ListenerNotifierManager.getInstance().removeJobNotifyExecutor(jobName);
@@ -183,6 +189,7 @@ public final class JobRegistry {
      * @return job is shutdown or not
      */
     public boolean isShutdown(final String jobName) {
+//        log.info("判定Job是否暂停:{}", jobName);
         return !schedulerMap.containsKey(jobName) || !jobInstanceMap.containsKey(jobName);
     }
 }

@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.kernel.internal.schedule;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.executor.ElasticJobExecutor;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -25,14 +26,16 @@ import org.quartz.JobExecutionContext;
 /**
  * Lite job.
  */
+@Slf4j
 @Setter
 public final class LiteJob implements Job {
-    
+
     private ElasticJobExecutor jobExecutor;
-    
+
     @Override
     public void execute(final JobExecutionContext context) {
+        log.info("LiteJob执行任务。。。。");
         jobExecutor.execute();
     }
-    
+
 }
