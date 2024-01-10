@@ -50,6 +50,7 @@ public final class MonitorExecutionListenerManager extends AbstractListenerManag
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            //配置发生变更且不是关闭监控
             if (configNode.isConfigPath(event.getKey()) && Type.UPDATED == event.getType()
                     && !YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().isMonitorExecution()) {
                 executionService.clearAllRunningInfo();

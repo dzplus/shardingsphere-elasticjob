@@ -106,7 +106,9 @@ public final class ExecutionService {
      */
     public void clearRunningInfo(final List<Integer> items) {
         for (int each : items) {
-            jobNodeStorage.removeJobNodeIfExisted(ShardingNode.getRunningNode(each));
+            String runningNode = ShardingNode.getRunningNode(each);
+            log.info("clearRunningInfo#runningNode:{}", runningNode);
+            jobNodeStorage.removeJobNodeIfExisted(runningNode);
         }
     }
 
