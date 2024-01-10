@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.config;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
@@ -30,6 +32,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 /**
  * Reschedule listener manager.
  */
+@Slf4j
 public final class RescheduleListenerManager extends AbstractListenerManager {
     
     private final ConfigurationNode configNode;
@@ -51,7 +54,9 @@ public final class RescheduleListenerManager extends AbstractListenerManager {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("RescheduleListenerManager#DataChangedEvent:{}", new Gson().toJson(event));
             if (configNode.isConfigPath(event.getKey()) && Type.UPDATED == event.getType() && !JobRegistry.getInstance().isShutdown(jobName)) {
+                log.info("收到配置变更事件，重新调度任务: {}", new Gson().toJson(event));
                 JobConfiguration jobConfig = YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration();
                 if (StringUtils.isEmpty(jobConfig.getCron())) {
                     JobRegistry.getInstance().getJobScheduleController(jobName).rescheduleJob();

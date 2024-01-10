@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.kernel.executor.facade;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.kernel.infra.exception.JobExecutionEnvironmentException;
@@ -212,7 +213,7 @@ public final class JobFacade {
      * @param jobExecutionEvent job execution event
      */
     public void postJobExecutionEvent(final JobExecutionEvent jobExecutionEvent) {
-        log.info("JobExecutionEvent:{}", jobExecutionEvent);
+        log.info("JobExecutionEvent:{}", new Gson().toJson(jobExecutionEvent));
         jobTracingEventBus.post(jobExecutionEvent);
     }
     
@@ -229,7 +230,7 @@ public final class JobFacade {
         JobStatusTraceEvent jobStatusTraceEvent = new JobStatusTraceEvent(taskContext.getMetaInfo().getJobName(), taskContext.getId(),
                 taskContext.getSlaveId(), taskContext.getType(), taskContext.getMetaInfo().getShardingItems().toString(), state, message);
         jobTracingEventBus.post(jobStatusTraceEvent);
-        log.info("JobStatusTraceEvent:{}", jobStatusTraceEvent);
+        log.info("JobStatusTraceEvent:{}", new Gson().toJson(jobStatusTraceEvent));
         if (!Strings.isNullOrEmpty(message)) {
             log.info(message);
         }

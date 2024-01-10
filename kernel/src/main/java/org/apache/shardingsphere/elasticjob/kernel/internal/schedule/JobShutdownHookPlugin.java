@@ -77,7 +77,7 @@ public final class JobShutdownHookPlugin implements SchedulerPlugin {
             
             @Override
             public void run() {
-                log.info("Shutting down Quartz... {}", jobName);
+                log.info("关闭Quartz... {}", jobName);
                 JobScheduleController scheduleController = JobRegistry.getInstance().getJobScheduleController(jobName);
                 if (null != scheduleController) {
                     scheduleController.shutdown(isCleanShutdown());

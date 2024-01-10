@@ -54,7 +54,7 @@ public final class TriggerListenerManager extends AbstractListenerManager {
         
         @Override
         public void onChange(final DataChangedEvent event) {
-            log.info("DataChangedEvent: {}", new Gson().toJson(event));
+            log.info("触发器监听: {}", new Gson().toJson(event));
             if (!triggerNode.isLocalTriggerPath(event.getKey()) || Type.ADDED != event.getType()) {
                 return;
             }

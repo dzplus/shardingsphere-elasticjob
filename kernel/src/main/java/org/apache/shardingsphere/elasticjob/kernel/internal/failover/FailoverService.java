@@ -225,7 +225,7 @@ public final class FailoverService {
             }
             //获取第一个失败的分片项
             int crashedItem = Integer.parseInt(jobNodeStorage.getJobNodeChildrenKeys(FailoverNode.ITEMS_ROOT).get(0));
-            log.info("Failover job '{}' begin, crashed item '{}'", jobName, crashedItem);
+            log.info("失败转移任务 '{}' 开始执行, crashed item '{}'", jobName, crashedItem);
             //将这个分片信息放到执行中的节点下
             jobNodeStorage.fillEphemeralJobNode(FailoverNode.getExecutionFailoverNode(crashedItem), JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId());
             jobNodeStorage.fillJobNode(FailoverNode.getExecutingFailoverNode(crashedItem), JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId());

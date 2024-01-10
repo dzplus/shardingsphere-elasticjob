@@ -53,7 +53,7 @@ public final class RegistryCenterConnectionStateListener implements ConnectionSt
     
     @Override
     public void onStateChanged(final CoordinatorRegistryCenter registryCenter, final State newState) {
-        log.info("org.apache.shardingsphere.elasticjob.kernel.internal.listener.RegistryCenterConnectionStateListener.onStateChanged");
+        log.info("注册中心连接器状态监听RegistryCenterConnectionStateListener.onStateChanged");
         if (JobRegistry.getInstance().isShutdown(jobName)) {
             return;
         }
