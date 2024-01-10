@@ -60,7 +60,7 @@ class SchedulerFacadeTest {
     @Test
     void assertShutdownInstanceIfNotLeaderAndReconcileServiceIsNotRunning() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         schedulerFacade.shutdownInstance();
         verify(leaderService, times(0)).removeLeader();
         verify(jobScheduleController).shutdown();
@@ -70,7 +70,7 @@ class SchedulerFacadeTest {
     void assertShutdownInstanceIfLeaderAndReconcileServiceIsRunning() {
         when(leaderService.isLeader()).thenReturn(true);
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         schedulerFacade.shutdownInstance();
         verify(leaderService).removeLeader();
         verify(jobScheduleController).shutdown();

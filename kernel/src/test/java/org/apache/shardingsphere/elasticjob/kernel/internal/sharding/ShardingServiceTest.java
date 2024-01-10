@@ -180,7 +180,7 @@ class ShardingServiceTest {
     @Test
     void assertGetShardingItemsWithAvailableServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(serverService.isAvailableServer("127.0.0.1")).thenReturn(true);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").build());
         when(jobNodeStorage.getJobNodeData("sharding/0/instance")).thenReturn("127.0.0.1@-@0");
@@ -199,7 +199,7 @@ class ShardingServiceTest {
     @Test
     void assertGetLocalShardingItemsWithDisabledServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         assertThat(shardingService.getLocalShardingItems(), is(Collections.<Integer>emptyList()));
         JobRegistry.getInstance().shutdown("test_job");
     }
@@ -207,7 +207,7 @@ class ShardingServiceTest {
     @Test
     void assertGetLocalShardingItemsWithEnabledServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(serverService.isAvailableServer("127.0.0.1")).thenReturn(true);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").build());
         when(jobNodeStorage.getJobNodeData("sharding/0/instance")).thenReturn("127.0.0.1@-@0");
@@ -246,7 +246,7 @@ class ShardingServiceTest {
     @Test
     void assertGetCrashedShardingItemsWithEnabledServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(serverService.isEnableServer("127.0.0.1")).thenReturn(true);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").build());
         when(jobNodeStorage.getJobNodeData("sharding/0/instance")).thenReturn("127.0.0.1@-@0");

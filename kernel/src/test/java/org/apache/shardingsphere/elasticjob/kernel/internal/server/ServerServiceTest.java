@@ -71,7 +71,7 @@ class ServerServiceTest {
     @Test
     void assertPersistOnlineForDisabledServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         serverService.persistOnline(false);
         verify(jobNodeStorage).fillJobNode("servers/127.0.0.1", ServerStatus.DISABLED.name());
         JobRegistry.getInstance().shutdown("test_job");
@@ -80,7 +80,7 @@ class ServerServiceTest {
     @Test
     void assertPersistOnlineForEnabledServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         serverService.persistOnline(true);
         verify(jobNodeStorage).fillJobNode("servers/127.0.0.1", ServerStatus.ENABLED.name());
         JobRegistry.getInstance().shutdown("test_job");

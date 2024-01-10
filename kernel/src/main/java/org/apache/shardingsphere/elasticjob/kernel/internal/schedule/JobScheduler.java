@@ -19,7 +19,6 @@ package org.apache.shardingsphere.elasticjob.kernel.internal.schedule;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ElasticJob;
@@ -151,7 +150,7 @@ public final class JobScheduler {
         log.info("开始创建Job:{}", getJobConfig().getJobName());
         JobScheduleController result = new JobScheduleController(createScheduler(), createJobDetail(), getJobConfig().getJobName());
         //先注册到本地schedulerMap
-        JobRegistry.getInstance().registerJob(getJobConfig().getJobName(), result);
+        JobRegistry.getInstance().registerJobScheduleController(getJobConfig().getJobName(), result);
         //然后注册到ZK上并启动
         registerStartUpInfo();
         log.info("开始创建Job....完成:{}", getJobConfig().getJobName());

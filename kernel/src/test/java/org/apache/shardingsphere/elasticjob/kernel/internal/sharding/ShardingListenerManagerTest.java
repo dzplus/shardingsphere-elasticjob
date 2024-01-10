@@ -124,7 +124,7 @@ class ShardingListenerManagerTest {
     @Test
     void assertListenServersChangedJobListenerWhenIsInstanceChange() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 1).build());
         shardingListenerManager.new ListenServersChangedJobListener().onChange(new DataChangedEvent(Type.ADDED, "/test_job/instances/xxx", ""));
         verify(shardingService).setReshardingFlag();
@@ -134,7 +134,7 @@ class ShardingListenerManagerTest {
     @Test
     void assertListenServersChangedJobListenerWhenIsServerChange() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 1).build());
         shardingListenerManager.new ListenServersChangedJobListener().onChange(new DataChangedEvent(Type.UPDATED, "/test_job/servers/127.0.0.1", ""));
         verify(shardingService).setReshardingFlag();
@@ -144,7 +144,7 @@ class ShardingListenerManagerTest {
     @Test
     void assertListenServersChangedJobListenerWhenIsStaticSharding() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 1).staticSharding(true).build());
         when(regCenter.getChildrenKeys("/test_job/sharding")).thenReturn(Lists.newArrayList("0"));
         shardingListenerManager.new ListenServersChangedJobListener().onChange(new DataChangedEvent(Type.UPDATED, "/test_job/servers/127.0.0.1", ""));

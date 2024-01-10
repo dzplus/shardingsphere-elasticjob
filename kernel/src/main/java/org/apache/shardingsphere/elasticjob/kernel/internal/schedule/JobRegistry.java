@@ -30,7 +30,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Job registry.
+ * 任务实例注册中心
  */
+
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JobRegistry {
@@ -81,7 +83,7 @@ public final class JobRegistry {
      * @param jobName job name
      * @param jobScheduleController job schedule controller
      */
-    public void registerJob(final String jobName, final JobScheduleController jobScheduleController) {
+    public void registerJobScheduleController(final String jobName, final JobScheduleController jobScheduleController) {
         log.info("注册Job到schedulerMap:{}", jobName);
         schedulerMap.put(jobName, jobScheduleController);
     }

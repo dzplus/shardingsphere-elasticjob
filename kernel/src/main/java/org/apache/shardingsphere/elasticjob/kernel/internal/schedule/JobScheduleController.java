@@ -163,7 +163,7 @@ public final class JobScheduleController {
      */
     // TODO duanzhang 2024/1/8 15:28 此处为触发任务关键节点
     public synchronized void triggerJob() {
-        log.info("triggerJob" + jobDetail.getKey());
+        log.info("触发任务" + jobDetail.getKey());
         try {
             if (scheduler.isShutdown()) {
                 return;

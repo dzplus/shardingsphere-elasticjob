@@ -32,7 +32,7 @@ public final class SimpleJobExecutor implements ClassedJobItemExecutor<SimpleJob
     
     @Override
     public void process(final SimpleJob elasticJob, final JobConfiguration jobConfig, final JobRuntimeService jobRuntimeService, final ShardingContext shardingContext) {
-        log.info("SimpleJobExecutor process,{},{},{}",elasticJob.getClass().getName(),jobConfig.getJobName(),jobConfig.getJobListenerTypes());
+        log.info("简单任务执行器,{},{},{}",elasticJob.getClass().getName(),jobConfig.getJobName(),jobConfig.getJobListenerTypes());
         elasticJob.execute(shardingContext);
     }
     

@@ -99,7 +99,7 @@ class ElectionListenerManagerTest {
     @Test
     void assertLeaderElectionWhenRemoveLeaderInstancePathWithAvailableServer() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(serverService.isAvailableServer("127.0.0.1")).thenReturn(true);
         electionListenerManager.new LeaderElectionJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/leader/election/instance", "127.0.0.1"));
         verify(leaderService).electLeader();
@@ -121,7 +121,7 @@ class ElectionListenerManagerTest {
     @Test
     void assertLeaderElectionWhenServerEnableWithoutLeader() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         electionListenerManager.new LeaderElectionJobListener().onChange(new DataChangedEvent(Type.UPDATED, "/test_job/servers/127.0.0.1", ""));
         verify(leaderService).electLeader();
         JobRegistry.getInstance().shutdown("test_job");

@@ -95,6 +95,7 @@ public final class JobFacade {
      * Failover If necessary.
      */
     public void failoverIfNecessary() {
+        //如果打开了失败转移
         if (configService.load(true).isFailover()) {
             failoverService.failoverIfNecessary();
         }
@@ -116,6 +117,7 @@ public final class JobFacade {
      */
     public void registerJobCompleted(final ShardingContexts shardingContexts) {
         executionService.registerJobCompleted(shardingContexts);
+        //获取配置，如果是失败转移的，就更新失败转移的完成状态
         if (configService.load(true).isFailover()) {
             failoverService.updateFailoverComplete(shardingContexts.getShardingItemParameters().keySet());
         }
@@ -169,6 +171,7 @@ public final class JobFacade {
      * @return need to execute misfire tasks or not
      */
     public boolean isExecuteMisfired(final Collection<Integer> shardingItems) {
+        //获取配置，如果是错过任务重新执行打开 且 不需要分片 且 有错过的任务
         return configService.load(true).isMisfire() && !isNeedSharding() && !executionService.getMisfiredJobItems(shardingItems).isEmpty();
     }
     
@@ -209,6 +212,7 @@ public final class JobFacade {
      * @param jobExecutionEvent job execution event
      */
     public void postJobExecutionEvent(final JobExecutionEvent jobExecutionEvent) {
+        log.info("JobExecutionEvent:{}", jobExecutionEvent);
         jobTracingEventBus.post(jobExecutionEvent);
     }
     
@@ -218,13 +222,16 @@ public final class JobFacade {
      * @param taskId task Id
      * @param state job state
      * @param message job message
+     * 这个事件推送
      */
     public void postJobStatusTraceEvent(final String taskId, final State state, final String message) {
         TaskContext taskContext = TaskContext.from(taskId);
-        jobTracingEventBus.post(new JobStatusTraceEvent(taskContext.getMetaInfo().getJobName(), taskContext.getId(),
-                taskContext.getSlaveId(), taskContext.getType(), taskContext.getMetaInfo().getShardingItems().toString(), state, message));
+        JobStatusTraceEvent jobStatusTraceEvent = new JobStatusTraceEvent(taskContext.getMetaInfo().getJobName(), taskContext.getId(),
+                taskContext.getSlaveId(), taskContext.getType(), taskContext.getMetaInfo().getShardingItems().toString(), state, message);
+        jobTracingEventBus.post(jobStatusTraceEvent);
+        log.info("JobStatusTraceEvent:{}", jobStatusTraceEvent);
         if (!Strings.isNullOrEmpty(message)) {
-            log.trace(message);
+            log.info(message);
         }
     }
     

@@ -87,7 +87,7 @@ class ShutdownListenerManagerTest {
     @Test
     void assertIsNotLocalInstancePath() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         shutdownListenerManager.new InstanceShutdownStatusJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/instances/127.0.0.2@-@0", ""));
         verify(schedulerFacade, times(0)).shutdownInstance();
     }
@@ -95,7 +95,7 @@ class ShutdownListenerManagerTest {
     @Test
     void assertUpdateLocalInstancePath() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         shutdownListenerManager.new InstanceShutdownStatusJobListener().onChange(new DataChangedEvent(Type.UPDATED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(schedulerFacade, times(0)).shutdownInstance();
     }
@@ -103,7 +103,7 @@ class ShutdownListenerManagerTest {
     @Test
     void assertRemoveLocalInstancePathForPausedJob() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(jobScheduleController.isPaused()).thenReturn(true);
         shutdownListenerManager.new InstanceShutdownStatusJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(schedulerFacade, times(0)).shutdownInstance();
@@ -112,7 +112,7 @@ class ShutdownListenerManagerTest {
     @Test
     void assertRemoveLocalInstancePathForReconnectedRegistryCenter() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(instanceService.isLocalJobInstanceExisted()).thenReturn(true);
         shutdownListenerManager.new InstanceShutdownStatusJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(schedulerFacade, times(0)).shutdownInstance();
@@ -121,7 +121,7 @@ class ShutdownListenerManagerTest {
     @Test
     void assertRemoveLocalInstancePath() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         shutdownListenerManager.new InstanceShutdownStatusJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(schedulerFacade).shutdownInstance();
     }

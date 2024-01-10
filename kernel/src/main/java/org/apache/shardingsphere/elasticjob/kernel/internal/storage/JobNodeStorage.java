@@ -78,7 +78,7 @@ public final class JobNodeStorage {
     public String getJobNodeData(final String node) {
         String fullPath = jobNodePath.getFullPath(node);
         String s = regCenter.get(fullPath);
-        log.info("fullPath:{},value:{},从本地缓存中拉取", fullPath, s);
+        log.info("fullPath:{},从本地缓存中拉取", fullPath);
         return s;
     }
 
@@ -133,7 +133,9 @@ public final class JobNodeStorage {
      */
     public void removeJobNodeIfExisted(final String node) {
         if (isJobNodeExisted(node)) {
-            regCenter.remove(jobNodePath.getFullPath(node));
+            String fullPath = jobNodePath.getFullPath(node);
+            log.info("removeJobNodeIfExisted:{}", fullPath);
+            regCenter.remove(fullPath);
         }
     }
 

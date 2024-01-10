@@ -105,7 +105,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertJobCrashedJobListenerWhenIsNotNodeRemoved() {
         JobRegistry.getInstance().addJobInstance("test_job", new JobInstance("127.0.0.1@-@0"));
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         failoverListenerManager.new JobCrashedJobListener().onChange(new DataChangedEvent(Type.ADDED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(failoverService, times(0)).failoverIfNecessary();
@@ -115,7 +115,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertJobCrashedJobListenerWhenIsNotInstancesPath() {
         JobRegistry.getInstance().addJobInstance("test_job", new JobInstance("127.0.0.1@-@0"));
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         failoverListenerManager.new JobCrashedJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/other/127.0.0.1@-@0", ""));
         verify(failoverService, times(0)).failoverIfNecessary();
@@ -125,7 +125,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertJobCrashedJobListenerWhenIsSameInstance() {
         JobRegistry.getInstance().addJobInstance("test_job", new JobInstance("127.0.0.1@-@0"));
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         failoverListenerManager.new JobCrashedJobListener().onChange(new DataChangedEvent(Type.DELETED, "/test_job/instances/127.0.0.1@-@0", ""));
         verify(failoverService, times(0)).failoverIfNecessary();
@@ -135,7 +135,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertJobCrashedJobListenerWhenIsOtherInstanceCrashed() {
         JobRegistry.getInstance().addJobInstance("test_job", new JobInstance("127.0.0.1@-@0"));
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         when(shardingService.getCrashedShardingItems("127.0.0.1@-@1")).thenReturn(Arrays.asList(0, 2));
         when(instanceNode.isInstancePath("/test_job/instances/127.0.0.1@-@1")).thenReturn(true);
@@ -150,7 +150,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertJobCrashedJobListenerWhenIsOtherFailoverInstanceCrashed() {
         JobRegistry.getInstance().addJobInstance("test_job", new JobInstance("127.0.0.1@-@0"));
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         when(failoverService.getFailoveringItems("127.0.0.1@-@1")).thenReturn(Collections.singletonList(1));
         when(instanceNode.isInstancePath("/test_job/instances/127.0.0.1@-@1")).thenReturn(true);
@@ -188,7 +188,7 @@ class FailoverListenerManagerTest {
     @Test
     void assertLegacyCrashedRunningItemListenerWhenRunningItemsArePresent() {
         JobInstance jobInstance = new JobInstance("127.0.0.1@-@1");
-        JobRegistry.getInstance().registerJob("test_job", mock(JobScheduleController.class));
+        JobRegistry.getInstance().registerJobScheduleController("test_job", mock(JobScheduleController.class));
         JobRegistry.getInstance().addJobInstance("test_job", jobInstance);
         when(configService.load(true)).thenReturn(JobConfiguration.newBuilder("test_job", 3).cron("0/1 * * * * ?").failover(true).build());
         when(instanceNode.getLocalInstancePath()).thenReturn("instances/127.0.0.1@-@1");

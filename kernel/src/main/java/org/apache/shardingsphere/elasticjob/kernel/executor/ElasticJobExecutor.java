@@ -111,8 +111,11 @@ public final class ElasticJobExecutor {
             jobErrorHandler.handleException(jobConfig.getJobName(), cause);
         }
         execute(jobConfig, shardingContexts, ExecutionSource.NORMAL_TRIGGER);
+        //失败转移打开 且 不需要分片 且 有错过的任务
         while (jobFacade.isExecuteMisfired(shardingContexts.getShardingItemParameters().keySet())) {
+            //先清除
             jobFacade.clearMisfire(shardingContexts.getShardingItemParameters().keySet());
+            //然后已失败重新执行的方式再执行一遍
             execute(jobConfig, shardingContexts, ExecutionSource.MISFIRE);
         }
         jobFacade.failoverIfNecessary();
@@ -134,9 +137,11 @@ public final class ElasticJobExecutor {
         String taskId = shardingContexts.getTaskId();
         jobFacade.postJobStatusTraceEvent(taskId, State.TASK_RUNNING, "");
         try {
+            //都执行完了才算执行完了
             process(jobConfig, shardingContexts, executionSource);
         } finally {
             // TODO Consider increasing the status of job failure, and how to handle the overall loop of job failure
+            //这个代码就相当于标记任务已经执行完了
             jobFacade.registerJobCompleted(shardingContexts);
             if (itemErrorMessages.isEmpty()) {
                 jobFacade.postJobStatusTraceEvent(taskId, State.TASK_FINISHED, "");
@@ -149,12 +154,17 @@ public final class ElasticJobExecutor {
 
     private void process(final JobConfiguration jobConfig, final ShardingContexts shardingContexts, final ExecutionSource executionSource) {
         Collection<Integer> items = shardingContexts.getShardingItemParameters().keySet();
+        //单机单片执行的
         if (1 == items.size()) {
+            log.info("以下是单机单片任务执行逻辑");
             int item = shardingContexts.getShardingItemParameters().keySet().iterator().next();
             JobExecutionEvent jobExecutionEvent = new JobExecutionEvent(IpUtils.getHostName(), IpUtils.getIp(), shardingContexts.getTaskId(), jobConfig.getJobName(), executionSource, item);
             process(jobConfig, shardingContexts, item, jobExecutionEvent);
             return;
         }
+        //单机多片执行的
+        log.info("以下是单机多片任务执行逻辑");
+        //CountDownLatch的时候需要传入一个整数n，在这个整数“倒数”到0之前，主线程需要等待在门口
         CountDownLatch latch = new CountDownLatch(items.size());
         for (int each : items) {
             JobExecutionEvent jobExecutionEvent = new JobExecutionEvent(IpUtils.getHostName(), IpUtils.getIp(), shardingContexts.getTaskId(), jobConfig.getJobName(), executionSource, each);
@@ -180,18 +190,19 @@ public final class ElasticJobExecutor {
     @SuppressWarnings("unchecked")
     private void process(final JobConfiguration jobConfig, final ShardingContexts shardingContexts, final int item, final JobExecutionEvent startEvent) {
         jobFacade.postJobExecutionEvent(startEvent);
-        log.trace("Job '{}' executing, item is: '{}'.", jobConfig.getJobName(), item);
+        log.info("Job '{}' executing, item is: '{}'.", jobConfig.getJobName(), item);
         JobExecutionEvent completeEvent;
         try {
             jobItemExecutor.process(elasticJob, jobConfig, jobFacade.getJobRuntimeService(), shardingContexts.createShardingContext(item));
             completeEvent = startEvent.executionSuccess();
-            log.trace("Job '{}' executed, item is: '{}'.", jobConfig.getJobName(), item);
+            log.info("Job '{}' executed, item is: '{}'.", jobConfig.getJobName(), item);
             jobFacade.postJobExecutionEvent(completeEvent);
             // CHECKSTYLE:OFF
         } catch (final Throwable cause) {
             // CHECKSTYLE:ON
             completeEvent = startEvent.executionFailure(ExceptionUtils.transform(cause));
             jobFacade.postJobExecutionEvent(completeEvent);
+            //错误信息放进来
             itemErrorMessages.put(item, ExceptionUtils.transform(cause));
             JobErrorHandler jobErrorHandler = jobErrorHandlerReloader.getJobErrorHandler();
             jobErrorHandler.handleException(jobConfig.getJobName(), cause);

@@ -87,7 +87,7 @@ class TriggerListenerManagerTest {
     @Test
     void assertTriggerWhenJobIsRunning() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         JobRegistry.getInstance().setJobRunning("test_job", true);
         triggerListenerManager.new JobTriggerStatusJobListener().onChange(new DataChangedEvent(DataChangedEvent.Type.ADDED, "/test_job/trigger/127.0.0.1@-@0", ""));
         verify(triggerService).removeTriggerFlag();
@@ -99,7 +99,7 @@ class TriggerListenerManagerTest {
     @Test
     void assertTriggerWhenJobIsNotRunning() {
         JobRegistry.getInstance().registerRegistryCenter("test_job", regCenter);
-        JobRegistry.getInstance().registerJob("test_job", jobScheduleController);
+        JobRegistry.getInstance().registerJobScheduleController("test_job", jobScheduleController);
         triggerListenerManager.new JobTriggerStatusJobListener().onChange(new DataChangedEvent(DataChangedEvent.Type.ADDED, "/test_job/trigger/127.0.0.1@-@0", ""));
         verify(triggerService).removeTriggerFlag();
         verify(jobScheduleController).triggerJob();
