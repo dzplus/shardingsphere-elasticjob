@@ -31,6 +31,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 
 /**
  * Reschedule listener manager.
+ * 重新调度监听管理器
  */
 @Slf4j
 public final class RescheduleListenerManager extends AbstractListenerManager {

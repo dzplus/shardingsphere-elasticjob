@@ -60,6 +60,7 @@ public final class ListenerManager {
     
     public ListenerManager(final CoordinatorRegistryCenter regCenter, final String jobName, final Collection<ElasticJobListener> elasticJobListeners) {
         jobNodeStorage = new JobNodeStorage(regCenter, jobName);
+        //此处注册监听器 用于监听节点变化
         ListenerNotifierManager.getInstance().registerJobNotifyExecutor(jobName);
         electionListenerManager = new ElectionListenerManager(regCenter, jobName);
         shardingListenerManager = new ShardingListenerManager(regCenter, jobName);

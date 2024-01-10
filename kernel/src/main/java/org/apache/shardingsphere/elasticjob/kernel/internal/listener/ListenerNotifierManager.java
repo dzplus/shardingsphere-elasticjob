@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  * Manage listener's notify executor,
  * each job has its own listener notify executor.
+ * 监听器管理
  */
 public final class ListenerNotifierManager {
     

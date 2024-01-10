@@ -31,7 +31,8 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 import java.util.Objects;
 
 /**
- * Election listener manager.
+ * Election listener manager.、
+ * 选主管理器
  */
 public final class ElectionListenerManager extends AbstractListenerManager {
     
@@ -56,14 +57,19 @@ public final class ElectionListenerManager extends AbstractListenerManager {
     
     @Override
     public void start() {
+        //添加的选举监听器
         addDataListener(new LeaderElectionJobListener());
+        //主节点被禁用监听
         addDataListener(new LeaderAbdicationJobListener());
     }
-    
+
+    //选举监听
     class LeaderElectionJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            //判定1 当前任务没有关闭
+            //判定2 当前集群没有leader且当前节点可用 且存在至少一个另外的节点
             if (!JobRegistry.getInstance().isShutdown(jobName) && (isActiveElection(event.getKey(), event.getValue()) || isPassiveElection(event.getKey(), event.getType()))) {
                 leaderService.electLeader();
             }
@@ -91,6 +97,8 @@ public final class ElectionListenerManager extends AbstractListenerManager {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            //判定1 当前节点为leader
+            //判定2 当前节点被禁用
             if (leaderService.isLeader() && isLocalServerDisabled(event.getKey(), event.getValue())) {
                 leaderService.removeLeader();
             }

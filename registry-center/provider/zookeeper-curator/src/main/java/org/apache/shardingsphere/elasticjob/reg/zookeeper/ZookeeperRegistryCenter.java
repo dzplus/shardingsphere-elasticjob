@@ -441,7 +441,6 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
 
     @Override
     public void watch(final String key, final DataChangedEventListener listener, final Executor executor) {
-        log.info("ZK-watch:{}", key + "/");
         CuratorCache cache = caches.get(key + "/");
         CuratorCacheListener cacheListener = (curatorType, oldData, newData) -> {
             if (null == newData && null == oldData) {
@@ -453,15 +452,17 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
                 return;
             }
             byte[] data = Type.DELETED == type ? oldData.getData() : newData.getData();
+            //大事小事、其他节点的事情都从这个事件
             listener.onChange(new DataChangedEvent(type, path, null == data ? "" : new String(data, StandardCharsets.UTF_8)));
         };
+        //将监听器注册到ZK连接器上
         if (executor != null) {
             cache.listenable().addListener(cacheListener, executor);
         } else {
             cache.listenable().addListener(cacheListener);
         }
+        //比对如果缺少cacheListener就添加，从侧面看出每个job的每种listener只能有一个
         dataListeners.computeIfAbsent(key, k -> new LinkedList<>()).add(cacheListener);
-        log.info("ZK-dataListeners:{}", dataListeners);
     }
 
     @Override
