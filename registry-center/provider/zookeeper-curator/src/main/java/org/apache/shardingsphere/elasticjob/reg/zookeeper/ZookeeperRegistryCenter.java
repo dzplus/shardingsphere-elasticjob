@@ -453,7 +453,9 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
             }
             byte[] data = Type.DELETED == type ? oldData.getData() : newData.getData();
             //大事小事、其他节点的事情都从这个事件
-            listener.onChange(new DataChangedEvent(type, path, null == data ? "" : new String(data, StandardCharsets.UTF_8)));
+            DataChangedEvent dataChangedEvent = new DataChangedEvent(type, path, null == data ? "" : new String(data, StandardCharsets.UTF_8));
+            log.info("DataChangedEvent发送,type：{},内容：{}",type,dataChangedEvent.getValue());
+            listener.onChange(dataChangedEvent);
         };
         //将监听器注册到ZK连接器上
         if (executor != null) {

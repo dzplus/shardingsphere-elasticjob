@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.sharding;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.JobConfigurationPOJO;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.ConfigurationNode;
@@ -29,6 +31,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 /**
  * Monitor execution listener manager.
  */
+@Slf4j
 public final class MonitorExecutionListenerManager extends AbstractListenerManager {
     
     private final ExecutionService executionService;
@@ -45,11 +48,13 @@ public final class MonitorExecutionListenerManager extends AbstractListenerManag
     public void start() {
         addDataListener(new MonitorExecutionSettingsChangedJobListener());
     }
-    
+
+
     class MonitorExecutionSettingsChangedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("MonitorExecutionSettingsChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             //配置发生变更且不是关闭监控
             if (configNode.isConfigPath(event.getKey()) && Type.UPDATED == event.getType()
                     && !YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().isMonitorExecution()) {

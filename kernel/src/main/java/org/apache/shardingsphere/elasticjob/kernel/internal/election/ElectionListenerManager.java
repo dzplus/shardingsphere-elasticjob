@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.election;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.internal.listener.AbstractListenerManager;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobRegistry;
@@ -34,6 +36,7 @@ import java.util.Objects;
  * Election listener manager.、
  * 选主管理器
  */
+@Slf4j
 public final class ElectionListenerManager extends AbstractListenerManager {
     
     private final String jobName;
@@ -64,10 +67,12 @@ public final class ElectionListenerManager extends AbstractListenerManager {
     }
 
     //选举监听
+
     class LeaderElectionJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("LeaderElectionJobListener收到数据变动事件：{}", new Gson().toJson(event));
             //判定1 当前任务没有关闭
             //判定2 当前集群没有leader且当前节点可用 且存在至少一个另外的节点
             if (!JobRegistry.getInstance().isShutdown(jobName) && (isActiveElection(event.getKey(), event.getValue()) || isPassiveElection(event.getKey(), event.getType()))) {
@@ -92,11 +97,12 @@ public final class ElectionListenerManager extends AbstractListenerManager {
             return serverNode.isLocalServerPath(path) && !ServerStatus.DISABLED.name().equals(data);
         }
     }
-    
+
     class LeaderAbdicationJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("LeaderAbdicationJobListener收到数据变动事件：{}", new Gson().toJson(event));
             //判定1 当前节点为leader
             //判定2 当前节点被禁用
             if (leaderService.isLeader() && isLocalServerDisabled(event.getKey(), event.getValue())) {

@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.instance;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.listener.AbstractListenerManager;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobRegistry;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.SchedulerFacade;
@@ -28,6 +30,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 /**
  * Job instance shutdown listener manager.
  */
+@Slf4j
 public final class ShutdownListenerManager extends AbstractListenerManager {
     
     private final String jobName;
@@ -50,11 +53,13 @@ public final class ShutdownListenerManager extends AbstractListenerManager {
     public void start() {
         addDataListener(new InstanceShutdownStatusJobListener());
     }
-    
+
+
     class InstanceShutdownStatusJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("InstanceShutdownStatusJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!JobRegistry.getInstance().isShutdown(jobName) && !JobRegistry.getInstance().getJobScheduleController(jobName).isPaused()
                     && isRemoveInstance(event.getKey(), event.getType()) && !isReconnectedRegistryCenter()) {
                 schedulerFacade.shutdownInstance();

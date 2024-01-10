@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.sharding;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.JobConfigurationPOJO;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.ConfigurationNode;
@@ -34,6 +36,7 @@ import org.apache.shardingsphere.elasticjob.reg.listener.DataChangedEventListene
 /**
  * Sharding listener manager.
  */
+@Slf4j
 public final class ShardingListenerManager extends AbstractListenerManager {
     
     private final String jobName;
@@ -66,11 +69,13 @@ public final class ShardingListenerManager extends AbstractListenerManager {
         addDataListener(new ShardingTotalCountChangedJobListener());
         addDataListener(new ListenServersChangedJobListener());
     }
-    
+
+
     class ShardingTotalCountChangedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("ShardingTotalCountChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (configNode.isConfigPath(event.getKey()) && 0 != JobRegistry.getInstance().getCurrentShardingTotalCount(jobName)) {
                 int newShardingTotalCount = YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().getShardingTotalCount();
                 if (newShardingTotalCount != JobRegistry.getInstance().getCurrentShardingTotalCount(jobName)) {
@@ -80,11 +85,12 @@ public final class ShardingListenerManager extends AbstractListenerManager {
             }
         }
     }
-    
+
     class ListenServersChangedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("ListenServersChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!JobRegistry.getInstance().isShutdown(jobName) && (isInstanceChange(event.getType(), event.getKey()) || isServerChange(event.getKey())) && !(isStaticSharding() && hasShardingInfo())) {
                 shardingService.setReshardingFlag();
             }

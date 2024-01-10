@@ -95,9 +95,12 @@ public final class FailoverService {
 
     private boolean needFailover() {
         //如果failover节点存在 并且failover节点下有子节点 并且任务没有在运行中
-        log.info("FailoverNode.ITEMS_ROOT:{}", FailoverNode.ITEMS_ROOT);
-        return jobNodeStorage.isJobNodeExisted(FailoverNode.ITEMS_ROOT) && !jobNodeStorage.getJobNodeChildrenKeys(FailoverNode.ITEMS_ROOT).isEmpty()
-                && !JobRegistry.getInstance().isJobRunning(jobName);
+        boolean jobNodeExisted = jobNodeStorage.isJobNodeExisted(FailoverNode.ITEMS_ROOT);
+        boolean empty = jobNodeStorage.getJobNodeChildrenKeys(FailoverNode.ITEMS_ROOT).isEmpty();
+        boolean jobRunning = JobRegistry.getInstance().isJobRunning(jobName);
+        boolean b = jobNodeExisted && !empty && !jobRunning;
+        log.info("FailoverNode.ITEMS_ROOT:{},jobNodeExisted:{},empty:{},jobRunning:{},res:{}", FailoverNode.ITEMS_ROOT, jobNodeExisted, empty, jobRunning, b);
+        return b;
     }
 
     /**

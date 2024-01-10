@@ -50,12 +50,13 @@ public final class RescheduleListenerManager extends AbstractListenerManager {
     public void start() {
         addDataListener(new CronSettingAndJobEventChangedJobListener());
     }
-    
+
+
     class CronSettingAndJobEventChangedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
-            log.info("RescheduleListenerManager#DataChangedEvent:{}", new Gson().toJson(event));
+            log.info("CronSettingAndJobEventChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (configNode.isConfigPath(event.getKey()) && Type.UPDATED == event.getType() && !JobRegistry.getInstance().isShutdown(jobName)) {
                 log.info("收到配置变更事件，重新调度任务: {}", new Gson().toJson(event));
                 JobConfiguration jobConfig = YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration();

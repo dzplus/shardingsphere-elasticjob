@@ -199,6 +199,7 @@ public final class ElasticJobExecutor {
             jobFacade.postJobExecutionEvent(completeEvent);
             // CHECKSTYLE:OFF
         } catch (final Throwable cause) {
+            log.error("FUCK!!!,执行任务出现异常",cause);
             // CHECKSTYLE:ON
             completeEvent = startEvent.executionFailure(ExceptionUtils.transform(cause));
             jobFacade.postJobExecutionEvent(completeEvent);

@@ -213,7 +213,7 @@ public final class JobFacade {
      * @param jobExecutionEvent job execution event
      */
     public void postJobExecutionEvent(final JobExecutionEvent jobExecutionEvent) {
-        log.info("JobExecutionEvent:{}", new Gson().toJson(jobExecutionEvent));
+        log.info("发送JobExecutionEvent:{}", new Gson().toJson(jobExecutionEvent));
         jobTracingEventBus.post(jobExecutionEvent);
     }
     
@@ -230,7 +230,7 @@ public final class JobFacade {
         JobStatusTraceEvent jobStatusTraceEvent = new JobStatusTraceEvent(taskContext.getMetaInfo().getJobName(), taskContext.getId(),
                 taskContext.getSlaveId(), taskContext.getType(), taskContext.getMetaInfo().getShardingItems().toString(), state, message);
         jobTracingEventBus.post(jobStatusTraceEvent);
-        log.info("JobStatusTraceEvent:{}", new Gson().toJson(jobStatusTraceEvent));
+        log.info("发送JobStatusTraceEvent:{}", new Gson().toJson(jobStatusTraceEvent));
         if (!Strings.isNullOrEmpty(message)) {
             log.info(message);
         }

@@ -49,12 +49,13 @@ public final class TriggerListenerManager extends AbstractListenerManager {
     public void start() {
         addDataListener(new JobTriggerStatusJobListener());
     }
-    
+
+
     class JobTriggerStatusJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
-            log.info("触发器监听: {}", new Gson().toJson(event));
+            log.info("JobTriggerStatusJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!triggerNode.isLocalTriggerPath(event.getKey()) || Type.ADDED != event.getType()) {
                 return;
             }

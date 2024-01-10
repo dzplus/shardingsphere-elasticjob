@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.failover;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.JobConfigurationPOJO;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
@@ -43,24 +45,25 @@ import java.util.Set;
 /**
  * Failover listener manager.
  */
+@Slf4j
 public final class FailoverListenerManager extends AbstractListenerManager {
-    
+
     private final String jobName;
-    
+
     private final ConfigurationService configService;
-    
+
     private final ShardingService shardingService;
-    
+
     private final FailoverService failoverService;
-    
+
     private final ExecutionService executionService;
-    
+
     private final InstanceService instanceService;
-    
+
     private final ConfigurationNode configNode;
-    
+
     private final InstanceNode instanceNode;
-    
+
     public FailoverListenerManager(final CoordinatorRegistryCenter regCenter, final String jobName) {
         super(regCenter, jobName);
         this.jobName = jobName;
@@ -72,22 +75,24 @@ public final class FailoverListenerManager extends AbstractListenerManager {
         configNode = new ConfigurationNode(jobName);
         instanceNode = new InstanceNode(jobName);
     }
-    
+
     @Override
     public void start() {
         addDataListener(new JobCrashedJobListener());
         addDataListener(new FailoverSettingsChangedJobListener());
         addDataListener(new LegacyCrashedRunningItemListener());
     }
-    
+
     private boolean isFailoverEnabled() {
         return configService.load(true).isFailover();
     }
-    
+
+
     class JobCrashedJobListener implements DataChangedEventListener {
-        
+
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("JobCrashedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!JobRegistry.getInstance().isShutdown(jobName) && isFailoverEnabled() && Type.DELETED == event.getType() && instanceNode.isInstancePath(event.getKey())) {
                 String jobInstanceId = event.getKey().substring(instanceNode.getInstanceFullPath().length() + 1);
                 if (jobInstanceId.equals(JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId())) {
@@ -108,21 +113,23 @@ public final class FailoverListenerManager extends AbstractListenerManager {
             }
         }
     }
-    
+
     class FailoverSettingsChangedJobListener implements DataChangedEventListener {
-        
+
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("FailoverSettingsChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (configNode.isConfigPath(event.getKey()) && Type.UPDATED == event.getType() && !YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().isFailover()) {
                 failoverService.removeFailoverInfo();
             }
         }
     }
-    
+
     class LegacyCrashedRunningItemListener implements DataChangedEventListener {
-        
+
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("LegacyCrashedRunningItemListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!isCurrentInstanceOnline(event) || !isFailoverEnabled()) {
                 return;
             }
@@ -152,11 +159,11 @@ public final class FailoverListenerManager extends AbstractListenerManager {
             }
             failoverService.failoverIfNecessary();
         }
-        
+
         private boolean isCurrentInstanceOnline(final DataChangedEvent event) {
             return Type.ADDED == event.getType() && !JobRegistry.getInstance().isShutdown(jobName) && event.getKey().endsWith(instanceNode.getLocalInstancePath());
         }
-        
+
         private boolean isTheOnlyInstance(final Set<JobInstance> availableJobInstances) {
             return Collections.singleton(JobRegistry.getInstance().getJobInstance(jobName)).equals(availableJobInstances);
         }

@@ -17,6 +17,8 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.guarantee;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.spi.listener.ElasticJobListener;
 import org.apache.shardingsphere.elasticjob.kernel.listener.AbstractDistributeOnceElasticJobListener;
 import org.apache.shardingsphere.elasticjob.kernel.internal.listener.AbstractListenerManager;
@@ -30,6 +32,7 @@ import java.util.Collection;
 /**
  * Guarantee listener manager.
  */
+@Slf4j
 public final class GuaranteeListenerManager extends AbstractListenerManager {
     
     private final GuaranteeNode guaranteeNode;
@@ -47,11 +50,13 @@ public final class GuaranteeListenerManager extends AbstractListenerManager {
         addDataListener(new StartedNodeRemovedJobListener());
         addDataListener(new CompletedNodeRemovedJobListener());
     }
-    
+
+
     class StartedNodeRemovedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("StartedNodeRemovedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (Type.DELETED == event.getType() && guaranteeNode.isStartedRootNode(event.getKey())) {
                 for (ElasticJobListener each : elasticJobListeners) {
                     if (each instanceof AbstractDistributeOnceElasticJobListener) {
@@ -61,11 +66,13 @@ public final class GuaranteeListenerManager extends AbstractListenerManager {
             }
         }
     }
-    
+
+
     class CompletedNodeRemovedJobListener implements DataChangedEventListener {
         
         @Override
         public void onChange(final DataChangedEvent event) {
+            log.info("CompletedNodeRemovedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (Type.DELETED == event.getType() && guaranteeNode.isCompletedRootNode(event.getKey())) {
                 for (ElasticJobListener each : elasticJobListeners) {
                     if (each instanceof AbstractDistributeOnceElasticJobListener) {
