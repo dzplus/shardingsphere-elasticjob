@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.executor;
 
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ElasticJob;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
@@ -83,19 +84,21 @@ public final class ElasticJobExecutor {
      * Execute job.
      */
     public void execute() {
-        log.info("执行任务。。。。");
+        log.info("执行任务");
         JobConfiguration jobConfig = jobFacade.loadJobConfiguration(true);
         //这是判断是不是要分片
         executorServiceReloader.reloadIfNecessary(jobConfig);
         //这个是看有没有异常处理器
         jobErrorHandlerReloader.reloadIfNecessary(jobConfig);
         JobErrorHandler jobErrorHandler = jobErrorHandlerReloader.getJobErrorHandler();
+        //对表
         try {
             jobFacade.checkJobExecutionEnvironment();
         } catch (final JobExecutionEnvironmentException cause) {
             jobErrorHandler.handleException(jobConfig.getJobName(), cause);
         }
         ShardingContexts shardingContexts = jobFacade.getShardingContexts();
+        log.info("当前执行的任务是:{}",new Gson().toJson(shardingContexts));
         jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_STAGING, String.format("Job '%s' execute begin.", jobConfig.getJobName()));
         if (jobFacade.misfireIfRunning(shardingContexts.getShardingItemParameters().keySet())) {
             jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_FINISHED, String.format(
@@ -110,15 +113,18 @@ public final class ElasticJobExecutor {
             // CHECKSTYLE:ON
             jobErrorHandler.handleException(jobConfig.getJobName(), cause);
         }
+        //执行任务
         execute(jobConfig, shardingContexts, ExecutionSource.NORMAL_TRIGGER);
-        //失败转移打开 且 不需要分片 且 有错过的任务
+        //执行完自己的分片后 错过任务重执行
         while (jobFacade.isExecuteMisfired(shardingContexts.getShardingItemParameters().keySet())) {
             //先清除
             jobFacade.clearMisfire(shardingContexts.getShardingItemParameters().keySet());
-            //然后已失败重新执行的方式再执行一遍
+            //然后未执行的方式再执行一遍
             execute(jobConfig, shardingContexts, ExecutionSource.MISFIRE);
         }
+        //检查有无节点挂了 失效转移
         jobFacade.failoverIfNecessary();
+        //都执行完了 回调一下
         try {
             jobFacade.afterJobExecuted(shardingContexts);
             // CHECKSTYLE:OFF
