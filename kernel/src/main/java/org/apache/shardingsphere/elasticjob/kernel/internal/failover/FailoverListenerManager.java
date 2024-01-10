@@ -94,11 +94,15 @@ public final class FailoverListenerManager extends AbstractListenerManager {
         public void onChange(final DataChangedEvent event) {
             log.info("JobCrashedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!JobRegistry.getInstance().isShutdown(jobName) && isFailoverEnabled() && Type.DELETED == event.getType() && instanceNode.isInstancePath(event.getKey())) {
+                //{"type":"DELETED","key":"/MySimpleJob/leader/sharding/processing","value":""}
                 String jobInstanceId = event.getKey().substring(instanceNode.getInstanceFullPath().length() + 1);
-                if (jobInstanceId.equals(JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId())) {
+                String targetId = JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId();
+                log.info("任务实例编号是:{},targetId:{}",jobInstanceId,targetId);
+                if (jobInstanceId.equals(targetId)) {
                     return;
                 }
                 List<Integer> failoverItems = failoverService.getFailoveringItems(jobInstanceId);
+                log.info("失败转移的内容是failoverItems:{}",failoverItems);
                 if (!failoverItems.isEmpty()) {
                     for (int each : failoverItems) {
                         failoverService.setCrashedFailoverFlagDirectly(each);

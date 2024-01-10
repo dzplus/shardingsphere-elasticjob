@@ -75,7 +75,9 @@ public final class FailoverService {
      * @param item crashed item
      */
     public void setCrashedFailoverFlagDirectly(final int item) {
-        jobNodeStorage.createJobNodeIfNeeded(FailoverNode.getItemsNode(item));
+        String itemsNode = FailoverNode.getItemsNode(item);
+        log.info("创建失败转移节点:{}", itemsNode);
+        jobNodeStorage.createJobNodeIfNeeded(itemsNode);
     }
 
     private boolean isFailoverAssigned(final Integer item) {

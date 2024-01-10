@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.elasticjob.kernel.internal.instance;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 import org.apache.shardingsphere.elasticjob.kernel.internal.schedule.JobRegistry;
 import org.apache.shardingsphere.elasticjob.kernel.internal.storage.JobNodePath;
@@ -24,6 +25,7 @@ import org.apache.shardingsphere.elasticjob.kernel.internal.storage.JobNodePath;
 /**
  * Instance node.
  */
+@Slf4j
 public final class InstanceNode {
     
     public static final String ROOT = "instances";
@@ -55,7 +57,9 @@ public final class InstanceNode {
      * @return path is job instance path or not
      */
     public boolean isInstancePath(final String path) {
-        return path.startsWith(jobNodePath.getFullPath(InstanceNode.ROOT));
+        String fullPath = jobNodePath.getFullPath(InstanceNode.ROOT);
+        log.info("isInstancePath,fullPath: {}", fullPath);
+        return path.startsWith(fullPath);
     }
     
     boolean isLocalInstancePath(final String path) {
