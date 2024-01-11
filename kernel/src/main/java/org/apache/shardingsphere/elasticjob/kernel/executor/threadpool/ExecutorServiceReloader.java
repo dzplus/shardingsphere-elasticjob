@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.kernel.executor.threadpool;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
 
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Executor service reloader.
  */
+@Slf4j
 public final class ExecutorServiceReloader implements Closeable {
     
     private String jobExecutorThreadPoolSizeProviderType;
@@ -54,6 +56,7 @@ public final class ExecutorServiceReloader implements Closeable {
     private void init(final JobConfiguration jobConfig) {
         JobExecutorThreadPoolSizeProvider jobExecutorThreadPoolSizeProvider = TypedSPILoader.getService(JobExecutorThreadPoolSizeProvider.class, jobConfig.getJobExecutorThreadPoolSizeProviderType());
         jobExecutorThreadPoolSizeProviderType = jobExecutorThreadPoolSizeProvider.getType();
+        log.info("初始化线程池大小:{}", jobExecutorThreadPoolSizeProvider.getSize());
         executorService = new ElasticJobExecutorService("elasticjob-" + jobConfig.getJobName(), jobExecutorThreadPoolSizeProvider.getSize()).createExecutorService();
     }
     

@@ -175,6 +175,7 @@ public final class ElasticJobExecutor {
         for (int each : items) {
             JobExecutionEvent jobExecutionEvent = new JobExecutionEvent(IpUtils.getHostName(), IpUtils.getIp(), shardingContexts.getTaskId(), jobConfig.getJobName(), executionSource, each);
             ExecutorService executorService = executorServiceReloader.getExecutorService();
+
             if (executorService.isShutdown()) {
                 return;
             }
