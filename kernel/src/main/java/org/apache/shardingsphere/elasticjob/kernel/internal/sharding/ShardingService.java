@@ -190,6 +190,7 @@ public final class ShardingService {
         int shardingTotalCount = configService.load(true).getShardingTotalCount();
         for (int i = 0; i < shardingTotalCount; i++) {
             if (jobInstance.getJobInstanceId().equals(jobNodeStorage.getJobNodeData(ShardingNode.getInstanceNode(i)))) {
+                log.info("筛选到属于本机的分片,jobInstanceId:{},i:{}",jobInstanceId,i);
                 result.add(i);
             }
         }
