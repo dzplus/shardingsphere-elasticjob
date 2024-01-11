@@ -145,6 +145,7 @@ public final class ShardingService {
     }
 
     private void resetShardingInfo(final int shardingTotalCount) {
+        log.info("重分片信息resetShardingInfo:{}",shardingTotalCount);
         for (int i = 0; i < shardingTotalCount; i++) {
             jobNodeStorage.removeJobNodeIfExisted(ShardingNode.getInstanceNode(i));
             jobNodeStorage.createJobNodeIfNeeded(ShardingNode.ROOT + "/" + i);
@@ -157,7 +158,9 @@ public final class ShardingService {
         }
     }
 
+    //这个应该就是 哪些分片分配到那些机器 这个结果转换为操作对象
     private List<TransactionOperation> getShardingResultTransactionOperations(final Map<JobInstance, List<Integer>> shardingResults) {
+        log.info("获取分片项,getShardingResultTransactionOperations");
         List<TransactionOperation> result = new ArrayList<>(shardingResults.size() + 2);
         for (Entry<JobInstance, List<Integer>> entry : shardingResults.entrySet()) {
             for (int shardingItem : entry.getValue()) {
