@@ -158,8 +158,14 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
         }
     }
 
+    /**
+     *  //如果本地取不到 直接从ZK取
+     * @param key key
+     * @return
+     */
     @Override
     public String get(final String key) {
+        log.info("取配置:{}",key);
         CuratorCache cache = findCuratorCache(key);
         if (null == cache) {
             return getDirectly(key);
@@ -169,21 +175,18 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
     }
 
     private CuratorCache findCuratorCache(final String key) {
-        log.info("从findCuratorCache获取配置:{}",key);
         for (Entry<String, CuratorCache> entry : caches.entrySet()) {
             if (key.startsWith(entry.getKey())) {
-                log.info("从findCuratorCache获取配置:{}",entry.getValue());
                 return entry.getValue();
             }
         }
-        log.info("从findCuratorCache获取配置:{}","未取到");
+        log.info("从Cache获取配置:{}","未取到");
         return null;
     }
 
     @Override
     public String getDirectly(final String key) {
         try {
-            log.info("从ZK获取配置getDirectly:{}",key);
             return new String(client.getData().forPath(key), StandardCharsets.UTF_8);
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
@@ -454,7 +457,7 @@ public final class ZookeeperRegistryCenter implements CoordinatorRegistryCenter 
             byte[] data = Type.DELETED == type ? oldData.getData() : newData.getData();
             //大事小事、其他节点的事情都从这个事件
             DataChangedEvent dataChangedEvent = new DataChangedEvent(type, path, null == data ? "" : new String(data, StandardCharsets.UTF_8));
-            log.info("DataChangedEvent发送,type：{},内容：{}",type,dataChangedEvent.getValue());
+//            log.info("DataChangedEvent发送,type：{},内容：{}",type,dataChangedEvent.getValue());
             listener.onChange(dataChangedEvent);
         };
         //将监听器注册到ZK连接器上

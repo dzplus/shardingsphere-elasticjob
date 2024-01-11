@@ -28,6 +28,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Reconcile service.
+ * 重协调管理器
+ * 在分布式的场景下由于网络、时钟等原因，可能导致 ZooKeeper 的数据与真实运行的作业产生不一致，这种不一致通过正向的校验无法完全避免。 需要另外启动一个线程定时校验注册中心数据与真实作业状态的一致性，即维持 ElasticJob 的最终一致性。
+ *
+ * 配置为小于 1 的任意值表示不执行修复。
  */
 @Slf4j
 public final class ReconcileService extends AbstractScheduledService {
@@ -52,11 +56,13 @@ public final class ReconcileService extends AbstractScheduledService {
     
     @Override
     protected void runOneIteration() {
+        log.info("runOneIteration执行,尝试重新协调执行");
         int reconcileIntervalMinutes = configService.load(true).getReconcileIntervalMinutes();
+        //如果协调时间间隔大于0，并且当前时间减去上次协调时间大于协调时间间隔，则开始协调
         if (reconcileIntervalMinutes > 0 && System.currentTimeMillis() - lastReconcileTime >= (long) reconcileIntervalMinutes * 60 * 1000) {
             lastReconcileTime = System.currentTimeMillis();
             if (!shardingService.isNeedSharding() && shardingService.hasShardingInfoInOfflineServers() && !(isStaticSharding() && hasShardingInfo())) {
-                log.warn("Elastic Job: job status node has inconsistent value,start reconciling...");
+                log.warn("Elastic Job: 作业状态节点值不一致，开始协调...");
                 shardingService.setReshardingFlag();
             }
         }

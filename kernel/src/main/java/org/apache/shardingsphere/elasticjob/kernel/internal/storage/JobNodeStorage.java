@@ -77,9 +77,17 @@ public final class JobNodeStorage {
      */
     public String getJobNodeData(final String node) {
         String fullPath = jobNodePath.getFullPath(node);
-        String s = regCenter.get(fullPath);
-        log.info("fullPath:{},从本地缓存中拉取", fullPath);
-        return s;
+        return regCenter.get(fullPath);
+    }
+
+    /**
+     * Get job node data.
+     *
+     * @param node node
+     * @return data of job node
+     */
+    public String getJobNodePath(final String node) {
+        return jobNodePath.getFullPath(node);
     }
 
     /**
@@ -89,9 +97,7 @@ public final class JobNodeStorage {
      * @return data of job node
      */
     public String getJobNodeDataDirectly(final String node) {
-        String directly = regCenter.getDirectly(jobNodePath.getFullPath(node));
-        log.info("{},直接从ZK上拉取", directly);
-        return directly;
+        return regCenter.getDirectly(jobNodePath.getFullPath(node));
     }
 
     /**

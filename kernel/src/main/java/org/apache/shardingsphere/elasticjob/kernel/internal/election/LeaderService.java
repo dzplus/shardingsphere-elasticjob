@@ -31,19 +31,19 @@ import org.apache.shardingsphere.elasticjob.kernel.infra.util.BlockUtils;
  */
 @Slf4j
 public final class LeaderService {
-    
+
     private final String jobName;
-    
+
     private final ServerService serverService;
-    
+
     private final JobNodeStorage jobNodeStorage;
-    
+
     public LeaderService(final CoordinatorRegistryCenter regCenter, final String jobName) {
         this.jobName = jobName;
         jobNodeStorage = new JobNodeStorage(regCenter, jobName);
         serverService = new ServerService(regCenter, jobName);
     }
-    
+
     /**
      * Elect leader.
      */
@@ -52,27 +52,33 @@ public final class LeaderService {
         jobNodeStorage.executeInLeader(LeaderNode.LATCH, new LeaderElectionExecutionCallback());
         log.info("Leader election completed.");
     }
-    
+
     /**
      * Judge current server is leader or not.
-     * 
+     *
      * <p>
      * If leader is electing, this method will block until leader elected success.
      * </p>
-     * 
+     *
      * @return current server is leader or not
      */
     public boolean isLeaderUntilBlock() {
+        String serverIp = JobRegistry.getInstance().getJobInstance(jobName).getServerIp();
+        //如果不存在leader 且存在可用节点 那就触发选举
         while (!hasLeader() && serverService.hasAvailableServers()) {
-            log.info("Leader is electing, waiting for {} ms", 100);
+            log.info("准备选举中，等待 {} ms", 100);
             BlockUtils.waitingShortTime();
-            if (!JobRegistry.getInstance().isShutdown(jobName) && serverService.isAvailableServer(JobRegistry.getInstance().getJobInstance(jobName).getServerIp())) {
+            log.info("检查选举状态, jobName: '{}',ServerIP:{}", jobName, serverIp);
+            if (!JobRegistry.getInstance().isShutdown(jobName) && serverService.isAvailableServer(serverIp)) {
+                log.info("触发选举流程, jobName: '{}',ServerIP:{}", jobName, serverIp);
                 electLeader();
             }
         }
-        return isLeader();
+        boolean leader = isLeader();
+        log.info("当前本机{}是否是leader:{}", serverIp, leader);
+        return leader;
     }
-    
+
     /**
      * Judge current server is leader or not.
      *
@@ -81,29 +87,31 @@ public final class LeaderService {
     public boolean isLeader() {
         return !JobRegistry.getInstance().isShutdown(jobName) && JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId().equals(jobNodeStorage.getJobNodeData(LeaderNode.INSTANCE));
     }
-    
+
     /**
      * Judge has leader or not in current time.
-     * 
+     *
      * @return has leader or not in current time
      */
     public boolean hasLeader() {
         return jobNodeStorage.isJobNodeExisted(LeaderNode.INSTANCE);
     }
-    
+
     /**
      * Remove leader and trigger leader election.
      */
     public void removeLeader() {
         jobNodeStorage.removeJobNodeIfExisted(LeaderNode.INSTANCE);
     }
-    
+
     @RequiredArgsConstructor
     class LeaderElectionExecutionCallback implements LeaderExecutionCallback {
-        
+
         @Override
         public void execute() {
+            //如果没有leader
             if (!hasLeader()) {
+                //填充临时节点到指定路径上
                 jobNodeStorage.fillEphemeralJobNode(LeaderNode.INSTANCE, JobRegistry.getInstance().getJobInstance(jobName).getJobInstanceId());
             }
         }

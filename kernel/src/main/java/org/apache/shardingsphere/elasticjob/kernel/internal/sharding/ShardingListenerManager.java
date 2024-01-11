@@ -79,7 +79,9 @@ public final class ShardingListenerManager extends AbstractListenerManager {
             if (configNode.isConfigPath(event.getKey()) && 0 != JobRegistry.getInstance().getCurrentShardingTotalCount(jobName)) {
                 int newShardingTotalCount = YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().getShardingTotalCount();
                 if (newShardingTotalCount != JobRegistry.getInstance().getCurrentShardingTotalCount(jobName)) {
+                    //如果新的分片数大于当前分片数，那么尝试选举 然后创建需要分片节点到ZK
                     shardingService.setReshardingFlag();
+                    //更新本地缓存的分片数
                     JobRegistry.getInstance().setCurrentShardingTotalCount(jobName, newShardingTotalCount);
                 }
             }

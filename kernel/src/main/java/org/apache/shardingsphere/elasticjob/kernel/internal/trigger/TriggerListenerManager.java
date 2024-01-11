@@ -55,10 +55,11 @@ public final class TriggerListenerManager extends AbstractListenerManager {
         
         @Override
         public void onChange(final DataChangedEvent event) {
-            log.info("JobTriggerStatusJobListener收到数据变动事件：{}", new Gson().toJson(event));
+            log.info("任务触发状态变更JobTriggerStatusJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!triggerNode.isLocalTriggerPath(event.getKey()) || Type.ADDED != event.getType()) {
                 return;
             }
+            log.info("任务触发状态变更JobTriggerStatusJobListener收到数据变动事件,执行逻辑：{}", new Gson().toJson(event));
             triggerService.removeTriggerFlag();
             if (!JobRegistry.getInstance().isShutdown(jobName) && !JobRegistry.getInstance().isJobRunning(jobName)) {
                 // TODO At present, it cannot be triggered when the job is running, and it will be changed to a stacked trigger in the future.

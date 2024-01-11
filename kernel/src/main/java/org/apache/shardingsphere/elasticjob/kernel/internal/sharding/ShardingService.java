@@ -113,7 +113,7 @@ public final class ShardingService {
             return;
         }
         if (!leaderService.isLeaderUntilBlock()) {
-            log.info("尝试分片....,正在选举中。。。。。,可以分片，阻塞直到分片结束{}",leaderService.isLeaderUntilBlock());
+            //走到这说明当前节点不是leader节点，那么就等待其他节点完成分片
             blockUntilShardingCompleted();
             return;
         }
@@ -130,9 +130,9 @@ public final class ShardingService {
     }
 
     private void blockUntilShardingCompleted() {
-        //不在选举、任务存在、任务正在执行
+        //不在选举、&& (任务存在|| 任务正在执行)
         while (!leaderService.isLeaderUntilBlock() && (jobNodeStorage.isJobNodeExisted(ShardingNode.NECESSARY) || jobNodeStorage.isJobNodeExisted(ShardingNode.PROCESSING))) {
-            log.info("Job '{}' sleep short time until sharding completed.", jobName);
+            log.info("Job '{}',当前节点不是leader节点，那么就等待其他节点完成分片", jobName);
             BlockUtils.waitingShortTime();
         }
     }

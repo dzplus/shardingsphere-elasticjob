@@ -97,6 +97,7 @@ public final class ElasticJobExecutor {
         } catch (final JobExecutionEnvironmentException cause) {
             jobErrorHandler.handleException(jobConfig.getJobName(), cause);
         }
+        //获取分片上下文的时候才想起来要分片
         ShardingContexts shardingContexts = jobFacade.getShardingContexts();
         log.info("当前执行的任务是:{}",new Gson().toJson(shardingContexts));
         jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_STAGING, String.format("Job '%s' execute begin.", jobConfig.getJobName()));
@@ -196,19 +197,21 @@ public final class ElasticJobExecutor {
 
     @SuppressWarnings("unchecked")
     private void process(final JobConfiguration jobConfig, final ShardingContexts shardingContexts, final int item, final JobExecutionEvent startEvent) {
+        log.info("发送开始处理任务事件JobExecutionEvent:{}", new Gson().toJson(startEvent));
         jobFacade.postJobExecutionEvent(startEvent);
         log.info("Job '{}' executing, item is: '{}'.", jobConfig.getJobName(), item);
         JobExecutionEvent completeEvent;
         try {
             jobItemExecutor.process(elasticJob, jobConfig, jobFacade.getJobRuntimeService(), shardingContexts.createShardingContext(item));
             completeEvent = startEvent.executionSuccess();
-            log.info("Job '{}' executed, item is: '{}'.", jobConfig.getJobName(), item);
+            log.info("发送开始处理完成任务事件JobExecutionEvent:{}", new Gson().toJson(startEvent));
             jobFacade.postJobExecutionEvent(completeEvent);
             // CHECKSTYLE:OFF
         } catch (final Throwable cause) {
             log.error("FUCK!!!,执行任务出现异常",cause);
             // CHECKSTYLE:ON
             completeEvent = startEvent.executionFailure(ExceptionUtils.transform(cause));
+            log.info("发送开始处理异常任务事件JobExecutionEvent:{}", new Gson().toJson(startEvent));
             jobFacade.postJobExecutionEvent(completeEvent);
             //错误信息放进来
             itemErrorMessages.put(item, ExceptionUtils.transform(cause));

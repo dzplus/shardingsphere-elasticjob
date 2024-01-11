@@ -137,6 +137,7 @@ public final class JobFacade {
                 return executionContextService.getJobShardingContext(failoverShardingItems);
             }
         }
+        //尝试分片
         shardingService.shardingIfNecessary();
         List<Integer> shardingItems = shardingService.getLocalShardingItems();
         if (isFailover) {
@@ -213,7 +214,6 @@ public final class JobFacade {
      * @param jobExecutionEvent job execution event
      */
     public void postJobExecutionEvent(final JobExecutionEvent jobExecutionEvent) {
-        log.info("发送JobExecutionEvent:{}", new Gson().toJson(jobExecutionEvent));
         jobTracingEventBus.post(jobExecutionEvent);
     }
     

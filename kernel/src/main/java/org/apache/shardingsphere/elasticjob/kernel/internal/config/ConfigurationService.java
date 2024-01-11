@@ -49,6 +49,7 @@ public final class ConfigurationService {
      * @return job configuration
      */
     public JobConfiguration load(final boolean fromCache) {
+        log.info("载入JobConfiguration配置,fromCache:{}，path:{}", fromCache,jobNodeStorage.getJobNodePath(ConfigurationNode.ROOT));
         String result;
         if (fromCache) {
             result = jobNodeStorage.getJobNodeData(ConfigurationNode.ROOT);
