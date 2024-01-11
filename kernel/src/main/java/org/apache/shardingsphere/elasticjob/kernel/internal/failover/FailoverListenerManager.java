@@ -109,7 +109,9 @@ public final class FailoverListenerManager extends AbstractListenerManager {
                         failoverService.failoverIfNecessary();
                     }
                 } else {
+                    log.info("失败转移的内容是failoverItems为空，从ZK上检索宕机分片");
                     for (int each : shardingService.getCrashedShardingItems(jobInstanceId)) {
+                        log.info("从ZK上检索到宕机分片");
                         failoverService.setCrashedFailoverFlag(each);
                         failoverService.failoverIfNecessary();
                     }

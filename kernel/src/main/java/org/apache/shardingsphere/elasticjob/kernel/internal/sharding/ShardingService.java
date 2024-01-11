@@ -178,6 +178,7 @@ public final class ShardingService {
      * @return sharding items
      */
     public List<Integer> getShardingItems(final String jobInstanceId) {
+        log.info("获取分片项,jobInstanceId:{}",jobInstanceId);
         JobInstance jobInstance = YamlEngine.unmarshal(jobNodeStorage.getJobNodeData(instanceNode.getInstancePath(jobInstanceId)), JobInstance.class);
         if (!serverService.isAvailableServer(jobInstance.getServerIp())) {
             return Collections.emptyList();
@@ -199,6 +200,7 @@ public final class ShardingService {
      * @return crashed sharding items
      */
     public List<Integer> getCrashedShardingItems(final String jobInstanceId) {
+        log.info("获取宕机分片项,jobInstanceId:{}",jobInstanceId);
         String serverIp = jobInstanceId.substring(0, jobInstanceId.indexOf(JobInstance.DELIMITER));
         if (!serverService.isEnableServer(serverIp)) {
             return Collections.emptyList();
@@ -223,6 +225,7 @@ public final class ShardingService {
      * @return sharding items from localhost job server
      */
     public List<Integer> getLocalShardingItems() {
+        log.info("本地获取分片项,jobName:{}",jobName);
         if (JobRegistry.getInstance().isShutdown(jobName) || !serverService.isAvailableServer(JobRegistry.getInstance().getJobInstance(jobName).getServerIp())) {
             return Collections.emptyList();
         }
@@ -235,6 +238,7 @@ public final class ShardingService {
      * @return has sharding info in offline servers or not
      */
     public boolean hasShardingInfoInOfflineServers() {
+        log.info("查询离线服务上是否存在分片");
         List<String> onlineInstances = jobNodeStorage.getJobNodeChildrenKeys(InstanceNode.ROOT);
         int shardingTotalCount = configService.load(true).getShardingTotalCount();
         for (int i = 0; i < shardingTotalCount; i++) {

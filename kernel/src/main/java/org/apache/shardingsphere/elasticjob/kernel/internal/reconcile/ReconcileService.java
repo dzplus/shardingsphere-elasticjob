@@ -28,10 +28,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Reconcile service.
- * 重协调管理器
+ * 重协调管理器 每分钟执行一次
  * 在分布式的场景下由于网络、时钟等原因，可能导致 ZooKeeper 的数据与真实运行的作业产生不一致，这种不一致通过正向的校验无法完全避免。 需要另外启动一个线程定时校验注册中心数据与真实作业状态的一致性，即维持 ElasticJob 的最终一致性。
  *
  * 配置为小于 1 的任意值表示不执行修复。
+ *
+ * PS 解释一下这个服务 这个服务用的是guava框架中的service
+ * Service框架可以帮助我们把异步操作封装成一个Service服务。
+ * 让这个服务有了运行状态(我们也可以理解成生命周期)，这样我们可以实时了解当前服务的运行状态。同时我们还可以添加监听器来监听服务运行状态之间的变化。
  */
 @Slf4j
 public final class ReconcileService extends AbstractScheduledService {
@@ -61,6 +65,7 @@ public final class ReconcileService extends AbstractScheduledService {
         //如果协调时间间隔大于0，并且当前时间减去上次协调时间大于协调时间间隔，则开始协调
         if (reconcileIntervalMinutes > 0 && System.currentTimeMillis() - lastReconcileTime >= (long) reconcileIntervalMinutes * 60 * 1000) {
             lastReconcileTime = System.currentTimeMillis();
+            //这个判断 1、当前状态不需要分片 2、离线服务商存在分片信息 3、不是静态分片或者没有分片信息
             if (!shardingService.isNeedSharding() && shardingService.hasShardingInfoInOfflineServers() && !(isStaticSharding() && hasShardingInfo())) {
                 log.warn("Elastic Job: 作业状态节点值不一致，开始协调...");
                 shardingService.setReshardingFlag();
