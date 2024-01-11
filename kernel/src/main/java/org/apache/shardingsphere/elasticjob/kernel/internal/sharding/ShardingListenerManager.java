@@ -80,8 +80,10 @@ public final class ShardingListenerManager extends AbstractListenerManager {
                 int newShardingTotalCount = YamlEngine.unmarshal(event.getValue(), JobConfigurationPOJO.class).toJobConfiguration().getShardingTotalCount();
                 if (newShardingTotalCount != JobRegistry.getInstance().getCurrentShardingTotalCount(jobName)) {
                     //如果新的分片数大于当前分片数，那么尝试选举 然后创建需要分片节点到ZK
+                    log.info("新的分片数大于当前分片数，那么尝试选举 然后创建需要分片节点到ZK");
                     shardingService.setReshardingFlag();
                     //更新本地缓存的分片数
+                    log.info("更新本地缓存的分片数");
                     JobRegistry.getInstance().setCurrentShardingTotalCount(jobName, newShardingTotalCount);
                 }
             }
@@ -94,6 +96,7 @@ public final class ShardingListenerManager extends AbstractListenerManager {
         public void onChange(final DataChangedEvent event) {
             log.info("ListenServersChangedJobListener收到数据变动事件：{}", new Gson().toJson(event));
             if (!JobRegistry.getInstance().isShutdown(jobName) && (isInstanceChange(event.getType(), event.getKey()) || isServerChange(event.getKey())) && !(isStaticSharding() && hasShardingInfo())) {
+                log.info("ListenServersChangedJobListener收到数据变动事件，创建需要分片节点到ZK");
                 shardingService.setReshardingFlag();
             }
         }
