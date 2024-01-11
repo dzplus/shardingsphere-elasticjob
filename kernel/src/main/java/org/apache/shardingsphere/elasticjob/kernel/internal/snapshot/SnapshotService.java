@@ -110,6 +110,7 @@ public final class SnapshotService {
     private void dumpDirectly(final String path, final String jobName, final List<String> result) {
         for (String each : regCenter.getChildrenKeys(path)) {
             String zkPath = path + "/" + each;
+            log.info("dumpDirectly,zkPath: {}", zkPath);
             String zkValue = Optional.ofNullable(regCenter.get(zkPath)).orElse("");
             String cachePath = zkPath;
             String cacheValue = zkValue;

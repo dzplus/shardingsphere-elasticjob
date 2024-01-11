@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.lifecycle.internal.statistics;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 import org.apache.shardingsphere.elasticjob.kernel.internal.storage.JobNodePath;
@@ -36,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Server statistics API implementation class.
  */
+@Slf4j
 @RequiredArgsConstructor
 public final class ServerStatisticsAPIImpl implements ServerStatisticsAPI {
     
@@ -59,7 +61,9 @@ public final class ServerStatisticsAPIImpl implements ServerStatisticsAPI {
             for (String each : regCenter.getChildrenKeys(jobNodePath.getServerNodePath())) {
                 servers.putIfAbsent(each, new ServerBriefInfo(each));
                 ServerBriefInfo serverInfo = servers.get(each);
-                if ("DISABLED".equalsIgnoreCase(regCenter.get(jobNodePath.getServerNodePath(each)))) {
+                String serverNodePath = jobNodePath.getServerNodePath(each);
+                log.info("getAllServersBriefInfo,serverNodePath: {}", serverNodePath);
+                if ("DISABLED".equalsIgnoreCase(regCenter.get(serverNodePath))) {
                     serverInfo.getDisabledJobsNum().incrementAndGet();
                 }
                 serverInfo.getJobNames().add(jobName);
@@ -67,7 +71,9 @@ public final class ServerStatisticsAPIImpl implements ServerStatisticsAPI {
             }
             List<String> instances = regCenter.getChildrenKeys(jobNodePath.getInstancesNodePath());
             for (String each : instances) {
-                JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(jobNodePath.getInstanceNodePath(each)), JobInstance.class);
+                String instanceNodePath = jobNodePath.getInstanceNodePath(each);
+                log.info("getAllServersBriefInfo,instanceNodePath: {}", instanceNodePath);
+                JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(instanceNodePath), JobInstance.class);
                 if (null != jobInstance) {
                     ServerBriefInfo serverInfo = servers.get(jobInstance.getServerIp());
                     if (null != serverInfo) {

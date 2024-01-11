@@ -76,8 +76,7 @@ public final class JobNodeStorage {
      * @return data of job node
      */
     public String getJobNodeData(final String node) {
-        String fullPath = jobNodePath.getFullPath(node);
-        return regCenter.get(fullPath);
+        return regCenter.get(jobNodePath.getFullPath(node));
     }
 
     /**

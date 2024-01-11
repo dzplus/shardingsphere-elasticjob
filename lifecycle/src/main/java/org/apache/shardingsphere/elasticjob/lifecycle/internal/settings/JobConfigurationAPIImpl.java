@@ -20,6 +20,7 @@ package org.apache.shardingsphere.elasticjob.lifecycle.internal.settings;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.JobConfigurationPOJO;
 import org.apache.shardingsphere.elasticjob.kernel.internal.storage.JobNodePath;
 import org.apache.shardingsphere.elasticjob.lifecycle.api.JobConfigurationAPI;
@@ -29,6 +30,7 @@ import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 /**
  * Job Configuration API implementation class.
  */
+@Slf4j
 @RequiredArgsConstructor
 public final class JobConfigurationAPIImpl implements JobConfigurationAPI {
     
@@ -36,7 +38,9 @@ public final class JobConfigurationAPIImpl implements JobConfigurationAPI {
     
     @Override
     public JobConfigurationPOJO getJobConfiguration(final String jobName) {
-        String yamlContent = regCenter.get(new JobNodePath(jobName).getConfigNodePath());
+        String configNodePath = new JobNodePath(jobName).getConfigNodePath();
+        log.info("getJobConfiguration,configNodePath: {}", configNodePath);
+        String yamlContent = regCenter.get(configNodePath);
         if (null == yamlContent) {
             return null;
         }

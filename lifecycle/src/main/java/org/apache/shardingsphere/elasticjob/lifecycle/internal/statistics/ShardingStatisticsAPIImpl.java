@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.lifecycle.internal.statistics;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.infra.yaml.YamlEngine;
 import org.apache.shardingsphere.elasticjob.kernel.internal.storage.JobNodePath;
@@ -33,6 +34,7 @@ import java.util.List;
 /**
  * Sharding statistics API implementation class.
  */
+@Slf4j
 @RequiredArgsConstructor
 public final class ShardingStatisticsAPIImpl implements ShardingStatisticsAPI {
     
@@ -57,11 +59,13 @@ public final class ShardingStatisticsAPIImpl implements ShardingStatisticsAPI {
         String instanceId = regCenter.get(jobNodePath.getShardingNodePath(item, "instance"));
         boolean disabled = regCenter.isExisted(jobNodePath.getShardingNodePath(item, "disabled"));
         boolean running = regCenter.isExisted(jobNodePath.getShardingNodePath(item, "running"));
-        boolean shardingError = !regCenter.isExisted(jobNodePath.getInstanceNodePath(instanceId));
+        String instanceNodePath = jobNodePath.getInstanceNodePath(instanceId);
+        log.info("getShardingInfo,instanceNodePath: {}", instanceNodePath);
+        boolean shardingError = !regCenter.isExisted(instanceNodePath);
         result.setStatus(ShardingInfo.ShardingStatus.getShardingStatus(disabled, running, shardingError));
         result.setFailover(regCenter.isExisted(jobNodePath.getShardingNodePath(item, "failover")));
         if (null != instanceId) {
-            JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(jobNodePath.getInstanceNodePath(instanceId)), JobInstance.class);
+            JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(instanceNodePath), JobInstance.class);
             result.setServerIp(jobInstance.getServerIp());
             result.setInstanceId(jobInstance.getJobInstanceId());
         }

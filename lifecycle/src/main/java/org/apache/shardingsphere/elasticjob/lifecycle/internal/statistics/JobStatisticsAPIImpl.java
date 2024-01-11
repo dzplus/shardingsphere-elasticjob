@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.elasticjob.lifecycle.internal.statistics;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.JobConfiguration;
 import org.apache.shardingsphere.elasticjob.kernel.internal.sharding.JobInstance;
 import org.apache.shardingsphere.elasticjob.kernel.internal.config.JobConfigurationPOJO;
@@ -37,6 +38,7 @@ import java.util.Set;
 /**
  * Job statistics API implementation class.
  */
+@Slf4j
 @RequiredArgsConstructor
 public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
     
@@ -66,7 +68,9 @@ public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
         JobNodePath jobNodePath = new JobNodePath(jobName);
         JobBriefInfo result = new JobBriefInfo();
         result.setJobName(jobName);
-        String jobConfigYaml = regCenter.get(jobNodePath.getConfigNodePath());
+        String configNodePath = jobNodePath.getConfigNodePath();
+        log.info("getJobBriefInfo,configNodePath: {}", configNodePath);
+        String jobConfigYaml = regCenter.get(configNodePath);
         if (null == jobConfigYaml) {
             return null;
         }
@@ -98,7 +102,9 @@ public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
         List<String> serversPath = regCenter.getChildrenKeys(jobNodePath.getServerNodePath());
         int disabledServerCount = 0;
         for (String each : serversPath) {
-            if (JobBriefInfo.JobStatus.DISABLED.name().equals(regCenter.get(jobNodePath.getServerNodePath(each)))) {
+            String serverNodePath = jobNodePath.getServerNodePath(each);
+            log.info("isAllDisabled,serverNodePath: {}", serverNodePath);
+            if (JobBriefInfo.JobStatus.DISABLED.name().equals(regCenter.get(serverNodePath))) {
                 disabledServerCount++;
             }
         }
@@ -108,7 +114,9 @@ public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
     private boolean isHasShardingFlag(final JobNodePath jobNodePath, final List<String> instances) {
         Set<String> shardingInstances = new HashSet<>();
         for (String each : regCenter.getChildrenKeys(jobNodePath.getShardingNodePath())) {
-            String instanceId = regCenter.get(jobNodePath.getShardingNodePath(each, "instance"));
+            String instance = jobNodePath.getShardingNodePath(each, "instance");
+            log.info("isHasShardingFlag,instance: {}", instance);
+            String instanceId = regCenter.get(instance);
             if (null != instanceId && !instanceId.isEmpty()) {
                 shardingInstances.add(instanceId);
             }
@@ -147,7 +155,9 @@ public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
     
     private JobBriefInfo.JobStatus getJobStatusByJobNameAndIp(final String jobName, final String ip) {
         JobNodePath jobNodePath = new JobNodePath(jobName);
-        String status = regCenter.get(jobNodePath.getServerNodePath(ip));
+        String serverNodePath = jobNodePath.getServerNodePath(ip);
+        log.info("getJobStatusByJobNameAndIp,serverNodePath: {}", serverNodePath);
+        String status = regCenter.get(serverNodePath);
         if ("DISABLED".equalsIgnoreCase(status)) {
             return JobBriefInfo.JobStatus.DISABLED;
         } else {
@@ -160,7 +170,9 @@ public final class JobStatisticsAPIImpl implements JobStatisticsAPI {
         JobNodePath jobNodePath = new JobNodePath(jobName);
         List<String> instances = regCenter.getChildrenKeys(jobNodePath.getInstancesNodePath());
         for (String each : instances) {
-            JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(jobNodePath.getInstanceNodePath(each)), JobInstance.class);
+            String instanceNodePath = jobNodePath.getInstanceNodePath(each);
+            log.info("getJobInstanceCountByJobNameAndIP,instanceNodePath: {}", instanceNodePath);
+            JobInstance jobInstance = YamlEngine.unmarshal(regCenter.get(instanceNodePath), JobInstance.class);
             if (ip.equals(jobInstance.getServerIp())) {
                 result++;
             }
