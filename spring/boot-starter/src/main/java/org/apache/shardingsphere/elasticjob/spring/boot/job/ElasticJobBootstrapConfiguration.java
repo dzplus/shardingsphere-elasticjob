@@ -49,7 +49,7 @@ public class ElasticJobBootstrapConfiguration implements SmartInitializingSingle
     
     @Override
     public void afterSingletonsInstantiated() {
-        log.info("creating Job Bootstrap Beans");
+        log.info("SpringBean实例化完成，开始创建Job Bootstrap Beans.");
         createJobBootstrapBeans();
         log.info("Job Bootstrap Beans created.");
     }
