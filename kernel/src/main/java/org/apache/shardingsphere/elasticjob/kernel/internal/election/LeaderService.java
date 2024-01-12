@@ -48,9 +48,9 @@ public final class LeaderService {
      * Elect leader.
      */
     public void electLeader() {
-        log.info("Elect a new leader now.");
+        log.info("准备选举一个新Leader");
         jobNodeStorage.executeInLeader(LeaderNode.LATCH, new LeaderElectionExecutionCallback());
-        log.info("Leader election completed.");
+        log.info("选举完成");
     }
 
     /**

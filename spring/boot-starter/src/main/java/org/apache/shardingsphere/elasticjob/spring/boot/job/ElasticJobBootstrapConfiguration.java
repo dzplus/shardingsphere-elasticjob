@@ -60,7 +60,6 @@ public class ElasticJobBootstrapConfiguration implements SmartInitializingSingle
     // TODO duanzhang 2024/1/7 15:25 这个地方是初始化
     public void createJobBootstrapBeans() {
         ElasticJobProperties elasticJobProperties = applicationContext.getBean(ElasticJobProperties.class);
-//        log.info("elasticJobProperties:{}",new Gson().toJson(elasticJobProperties));
         SingletonBeanRegistry singletonBeanRegistry = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
         CoordinatorRegistryCenter registryCenter = applicationContext.getBean(CoordinatorRegistryCenter.class);
         TracingConfiguration<?> tracingConfig = getTracingConfiguration();
