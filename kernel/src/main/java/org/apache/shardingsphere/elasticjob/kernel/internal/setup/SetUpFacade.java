@@ -29,6 +29,7 @@ import java.util.Collection;
 
 /**
  * Set up facade.
+ * 服务初始化
  */
 public final class SetUpFacade {
     
@@ -68,15 +69,19 @@ public final class SetUpFacade {
      * @param enabled enable job on startup
      */
     public void registerStartUpInfo(final boolean enabled) {
+        //开始所有监听器
         listenerManager.startAllListeners();
         //选举
         leaderService.electLeader();
-        //存储在云端
+        //将本机IP注册到ZK
         serverService.persistOnline(enabled);
+        //任务执行路径注册到ZK
         instanceService.persistOnline();
+        //这个相当于守护进程后续再说
         if (!reconcileService.isRunning()) {
             reconcileService.startAsync();
         }
+        //移除离线监听
         serverService.removeOfflineServers();
     }
     

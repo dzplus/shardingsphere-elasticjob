@@ -99,9 +99,12 @@ public final class ElasticJobExecutor {
         }
         //获取分片上下文的时候才想起来要分片
         ShardingContexts shardingContexts = jobFacade.getShardingContexts();
+        //执行前消息
         log.info("当前执行的任务是:{}",new Gson().toJson(shardingContexts));
         jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_STAGING, String.format("Job '%s' execute begin.", jobConfig.getJobName()));
+        //检查是否有上一轮任务错过重执行任务正在执行 如果有就将本轮任务添加到错过重执行标记位然后退出
         if (jobFacade.misfireIfRunning(shardingContexts.getShardingItemParameters().keySet())) {
+            //如果有就不执行本轮任务
             jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_FINISHED, String.format(
                     "Previous job '%s' - shardingItems '%s' is still running, misfired job will start after previous job completed.", jobConfig.getJobName(),
                     shardingContexts.getShardingItemParameters().keySet()));
@@ -116,17 +119,18 @@ public final class ElasticJobExecutor {
         }
         //执行任务
         execute(jobConfig, shardingContexts, ExecutionSource.NORMAL_TRIGGER);
-        //执行完自己的分片后 错过任务重执行
+        //执行完自己的分片后 检查错过任务重执行
         while (jobFacade.isExecuteMisfired(shardingContexts.getShardingItemParameters().keySet())) {
-            //先清除
+            //清除错过重执行标记
             jobFacade.clearMisfire(shardingContexts.getShardingItemParameters().keySet());
-            //然后未执行的方式再执行一遍
+            //执行任务
             execute(jobConfig, shardingContexts, ExecutionSource.MISFIRE);
         }
-        //检查有无节点挂了 失效转移
+        //检查有无宕机未执行任务 如果有执行失败转移
         jobFacade.failoverIfNecessary();
         //都执行完了 回调一下
         try {
+            //检查
             jobFacade.afterJobExecuted(shardingContexts);
             // CHECKSTYLE:OFF
         } catch (final Throwable cause) {
@@ -140,8 +144,10 @@ public final class ElasticJobExecutor {
             jobFacade.postJobStatusTraceEvent(shardingContexts.getTaskId(), State.TASK_FINISHED, String.format("Sharding item for job '%s' is empty.", jobConfig.getJobName()));
             return;
         }
+        //ZK中标记任务开始
         jobFacade.registerJobBegin(shardingContexts);
         String taskId = shardingContexts.getTaskId();
+        //推送消息
         jobFacade.postJobStatusTraceEvent(taskId, State.TASK_RUNNING, "");
         try {
             //都执行完了才算执行完了
@@ -149,7 +155,9 @@ public final class ElasticJobExecutor {
         } finally {
             // TODO Consider increasing the status of job failure, and how to handle the overall loop of job failure
             //这个代码就相当于标记任务已经执行完了
+            //ZK中标记任务完成
             jobFacade.registerJobCompleted(shardingContexts);
+            //根据结果推送错误或者完成事件
             if (itemErrorMessages.isEmpty()) {
                 jobFacade.postJobStatusTraceEvent(taskId, State.TASK_FINISHED, "");
             } else {
@@ -160,6 +168,7 @@ public final class ElasticJobExecutor {
     }
 
     private void process(final JobConfiguration jobConfig, final ShardingContexts shardingContexts, final ExecutionSource executionSource) {
+        //获取分片信息
         Collection<Integer> items = shardingContexts.getShardingItemParameters().keySet();
         //单机单片执行的
         if (1 == items.size()) {
@@ -202,6 +211,7 @@ public final class ElasticJobExecutor {
         log.info("Job '{}' executing, item is: '{}'.", jobConfig.getJobName(), item);
         JobExecutionEvent completeEvent;
         try {
+            //这个地方是执行你写的业务代码的地方
             jobItemExecutor.process(elasticJob, jobConfig, jobFacade.getJobRuntimeService(), shardingContexts.createShardingContext(item));
             completeEvent = startEvent.executionSuccess();
             log.info("发送开始处理完成任务事件JobExecutionEvent:{}", new Gson().toJson(startEvent));

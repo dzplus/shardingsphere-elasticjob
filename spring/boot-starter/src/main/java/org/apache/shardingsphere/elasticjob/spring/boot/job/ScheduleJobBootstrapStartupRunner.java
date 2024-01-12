@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * ElasticJob startup runner.
+ * 项目启动完成后，会来此处
  */
 @Setter
 @Slf4j
@@ -35,8 +36,8 @@ public class ScheduleJobBootstrapStartupRunner implements CommandLineRunner, App
     
     @Override
     public void run(final String... args) {
-        log.info("Starting ElasticJob Bootstrap.");
+        log.info("项目启动完成,准备调度任务");
         applicationContext.getBeansOfType(ScheduleJobBootstrap.class).values().forEach(ScheduleJobBootstrap::schedule);
-        log.info("ElasticJob Bootstrap started.");
+        log.info("项目启动完成,调度任务完成");
     }
 }

@@ -59,6 +59,7 @@ public final class ScheduleJobBootstrap implements JobBootstrap {
      */
     public void schedule() {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobScheduler.getJobConfig().getCron()), "Cron can not be empty.");
+        //这一步可以理解为 获取调度器控制器 然后通过调度器控制器调度任务
         log.info("jobScheduler通过Cron触发,name:{}", jobScheduler.getJobConfig().getJobName());
         jobScheduler.getJobScheduleController().scheduleJob(jobScheduler.getJobConfig().getCron(), jobScheduler.getJobConfig().getTimeZone());
     }

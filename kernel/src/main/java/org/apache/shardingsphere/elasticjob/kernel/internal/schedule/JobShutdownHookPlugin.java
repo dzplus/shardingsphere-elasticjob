@@ -43,6 +43,7 @@ public final class JobShutdownHookPlugin implements SchedulerPlugin {
     @Override
     public void initialize(final String name, final Scheduler scheduler, final ClassLoadHelper classLoadHelper) throws SchedulerException {
         jobName = scheduler.getSchedulerName();
+        //初始化会注册关机消息
         registerShutdownHook();
     }
     
@@ -64,10 +65,12 @@ public final class JobShutdownHookPlugin implements SchedulerPlugin {
         if (null == regCenter) {
             return;
         }
+        //如果当前为主节点那就移除主节点
         LeaderService leaderService = new LeaderService(regCenter, jobName);
         if (leaderService.isLeader()) {
             leaderService.removeLeader();
         }
+        //移除本机节点
         new InstanceService(regCenter, jobName).removeInstance();
     }
     
@@ -80,6 +83,7 @@ public final class JobShutdownHookPlugin implements SchedulerPlugin {
                 log.info("关闭Quartz... {}", jobName);
                 JobScheduleController scheduleController = JobRegistry.getInstance().getJobScheduleController(jobName);
                 if (null != scheduleController) {
+                    //停止本机
                     scheduleController.shutdown(isCleanShutdown());
                 }
             }

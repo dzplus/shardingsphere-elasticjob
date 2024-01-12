@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Job registry.
+ * 记录了当前节点执行的任务所有信息
  * 任务实例注册中心
  */
 
@@ -38,15 +39,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class JobRegistry {
     
     private static volatile JobRegistry instance;
-    
+
+    /**
+     * 任务-任务调度器
+     */
     private final Map<String, JobScheduleController> schedulerMap = new ConcurrentHashMap<>();
-    
+    /**
+     * 任务-注册中心
+     */
     private final Map<String, CoordinatorRegistryCenter> regCenterMap = new ConcurrentHashMap<>();
-    
+    /**
+     * 任务-可执行任务实例
+     */
     private final Map<String, JobInstance> jobInstanceMap = new ConcurrentHashMap<>();
-    
+    /**
+     * 任务-任务运行状态
+     */
     private final Map<String, Boolean> jobRunningMap = new ConcurrentHashMap<>();
-    
+    /**
+     * 任务-总分片信息
+     */
     private final Map<String, Integer> currentShardingTotalCountMap = new ConcurrentHashMap<>();
     
     /**
@@ -74,6 +86,7 @@ public final class JobRegistry {
     public void registerRegistryCenter(final String jobName, final CoordinatorRegistryCenter regCenter) {
         log.info("添加到regCenterMap:{}", jobName);
         regCenterMap.put(jobName, regCenter);
+        //将任务路径添加到ZK
         regCenter.addCacheData("/" + jobName);
     }
     

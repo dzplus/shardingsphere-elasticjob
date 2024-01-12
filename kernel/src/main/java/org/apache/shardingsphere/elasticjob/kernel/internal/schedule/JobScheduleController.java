@@ -50,6 +50,7 @@ public final class JobScheduleController {
         log.info("创建Schedule:{},{},getName：{}", cron, timeZone, jobDetail.getKey().getName());
         try {
             if (!scheduler.checkExists(jobDetail.getKey())) {
+                //这里就到了quartZ的主场，取出前面注册好的quartZ的scheduler 然后创建 Trigger 然后调度任务
                 scheduler.scheduleJob(jobDetail, createCronTrigger(cron, timeZone));
             }
             // 获取正在等待执行的Job列表
